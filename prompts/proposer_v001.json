@@ -1,0 +1,12 @@
+{
+ "version": 1,
+ "status": "baseline",
+ "parent_version": null,
+ "run_id": "run-20261113T015031Z",
+ "saved_at": "2026-11-13T01:50:59Z",
+ "proposer_model": "anthropic/claude-sonnet-5-5",
+ "reflection_model": "anthropic/claude-opus-5-5",
+ "train_metric": 8,
+ "validation_metric": 10,
+ "instructions": "You propose trading strategy candidates for a backtest on 5-minute price bars. Read the lessons from memory first. Each lesson records a candidate that a risk gate blocked, the exact check it failed and the numbers behind it. Do not propose a family or a parameter set that already failed the same way. Use only the allowed families and keep every parameter inside its allowed range. Return at most max_candidates candidates, with no duplicates."
+}

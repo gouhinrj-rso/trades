@@ -4,8 +4,8 @@
 
 A self-improving paper trading terminal; see `PLAN.md` for the design. Built so
 far: data fetch, backtest engine, risk gate, memory of failed ideas, round runner
-and prompt optimizer. The Streamlit app (`app.py`) is still a placeholder page and
-Kronos forecasting is not built.
+prompt optimizer, paper broker with kill switch, and a static terminal page (`view/index.html`).
+The Streamlit app (`app.py`) is still a placeholder page and Kronos forecasting is not built.
 
 `repos/` holds reference clones of Kronos, dspy and mem0. It is git-ignored;
 do not edit or commit it.
@@ -24,6 +24,9 @@ It was copied from `gouhinrj-rso/claude` (`trading-terminal/`) on 2026-11-13.
 | Risk gate | `python gate.py` (PASS or BLOCK for every candidate; thresholds are the owner's, in the config block at the top of `gate.py`; never loosen them to get more passes) |
 | Run a round | `python run_round.py` (read memory, propose, backtest, gate, save lessons, print memory) |
 | Optimize the proposal prompt | `python optimizer.py` (DSPy GEPA; needs an LLM key in the environment; `--show` prints best and previous prompts) |
+| Build the page data | `python build_view.py` (writes `view/data.js`; then open `view/index.html`, no server) |
+| Paper replay | `python paper.py --candidate "<name>"` (gate-passed candidates only; simulated orders) |
+| Kill switch | `python kill_switch.py status` / `engage "reason"` / `release --confirm` |
 | Show memory | `python memory.py` (prints every stored lesson) |
 | Fetch bars | `python fetch_data.py` (rerun prints the saved report; `--refresh` refetches and replaces every window) |
 
@@ -76,5 +79,28 @@ that already failed the same way.
   train but not on validation is saved as `flagged_overfitting` and never promoted.
 - The proposer's answer is data: candidates are validated against `FAMILY_SPECS` and nothing the model
   writes is executed.
-- As of 2026-11-13 the optimizer has only been run with a scripted stand-in model in tests. No real
-  optimization has been run and `prompts/` does not exist yet.
+- `TT_ANTHROPIC_API_BASE` (default `https://api.anthropic.com/v1`) is passed to DSPy explicitly. DSPy
+  appends only `/messages`, so an `ANTHROPIC_BASE_URL` without `/v1` gives HTTP 404 on every call.
+- First real run 2026-11-13 (20 trials, Sonnet 5.5 proposer, Opus 5.5 reflection): the baseline (v1)
+  stayed best (train 8, validation 10). The one rewrite (v2) scored train 14, validation 7 and was
+  flagged as overfitting: it had copied specific train-window parameter values into the prompt.
+- Known weakness: DSPy's response cache returns the same rewrite when the reflection input repeats, so
+  that run produced only one distinct new prompt from three rewrite steps.
+
+## Paper execution and the kill switch
+
+`paper.py` is a simulated broker. There is no real broker, exchange, key or network call anywhere in it.
+
+- Owner's settings (2026-11-13), in the block at the top of `paper.py`: limit orders only, a stop 1% below
+  every entry, a 2% daily loss cap, $10,000 paper capital. Do not change them without the owner asking.
+- `kill_switch.py` is its own module. A missing or unreadable state file means ENGAGED. Code may engage it.
+  **Only the owner releases it, from the command line. Never release it yourself, and never add a function
+  that releases it.**
+- Strategy code (`engine.py`) must never import or mention `kill_switch` or `paper`. `paper.py` runs
+  `kill_switch.check_strategy_isolation()` before every run and refuses to trade if it fails. Strategies
+  return wanted positions only; they never receive the broker.
+- `python paper.py` is a replay over the validation window, not forward trading. There are no new bars yet.
+- `view/index.html` is static: it loads `view/data.js` and `view/kill_switch_state.js` with script tags and
+  re-reads the kill switch file every 5 seconds. It shows train and validation prices only; the test window
+  is drawn as a locked band from its dates. `build_view.py` must never open the test file.
+- Page colors pass the RSO brand palette check (no gold/amber other than `#FFC107` for the status banner).

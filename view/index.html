@@ -1,0 +1,512 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Trading Terminal - Paper Only</title>
+<!--
+  Static page. No server, no network calls, no external files.
+  It reads two files written by the Python pipeline, loaded with plain <script> tags:
+    data.js               written by  python build_view.py
+    kill_switch_state.js  written by  python kill_switch.py (on every change)
+  The kill switch file is re-read every few seconds so its state is always on screen.
+-->
+<style>
+  :root {
+    color-scheme: light;
+    --page: #f3f2ee;
+    --surface: #fcfcfb;
+    --ink: #0b0b0b;
+    --ink-2: #52514e;
+    --muted: #898781;
+    --line: #e1e0d9;
+    --series: #013472;
+    --band: rgba(11, 11, 11, 0.035);
+    --band-alt: rgba(11, 11, 11, 0.075);
+    --good: #1f8a3b;
+    --good-text: #006300;
+    --critical: #c52d25;
+    --critical-text: #b31c14;
+    --banner-bg: #ffc107;
+    --banner-ink: #0b0b0b;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      color-scheme: dark;
+      --page: #111110;
+      --surface: #1a1a19;
+      --ink: #f0efec;
+      --ink-2: #c3c2b7;
+      --muted: #898781;
+      --line: #2c2c2a;
+      --series: #3987e5;
+      --band: rgba(240, 239, 236, 0.04);
+      --band-alt: rgba(240, 239, 236, 0.09);
+      --good-text: #3fb65c;
+      --critical-text: #ec6a6a;
+    }
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0; background: var(--page); color: var(--ink);
+    font: 14px/1.45 system-ui, -apple-system, "Segoe UI", Roboto, Arial, sans-serif;
+  }
+  .num { font-variant-numeric: tabular-nums; text-align: right; white-space: nowrap; }
+  code { font: 12.5px ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; }
+
+  /* ---- always-visible top bar: banner + kill switch ---- */
+  .top { position: sticky; top: 0; z-index: 10; box-shadow: 0 1px 0 var(--line); }
+  .banner {
+    background: var(--banner-bg); color: var(--banner-ink);
+    font-weight: 800; letter-spacing: 0.14em; text-align: center; padding: 7px 16px; font-size: 15px;
+  }
+  .banner small { font-weight: 600; letter-spacing: 0.02em; margin-left: 12px; font-size: 12.5px; }
+  .statusbar {
+    background: var(--surface); display: flex; flex-wrap: wrap; gap: 8px 20px;
+    align-items: center; justify-content: space-between; padding: 10px 16px;
+  }
+  .statusbar h1 { font-size: 16px; margin: 0; }
+  .statusbar .sub { color: var(--ink-2); font-size: 12.5px; }
+  .switch { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; }
+  .switch-pill {
+    display: inline-flex; align-items: center; gap: 8px; padding: 6px 12px; border-radius: 6px;
+    font-weight: 800; letter-spacing: 0.04em; color: #fff; white-space: nowrap;
+  }
+  .switch-pill.engaged { background: var(--critical); }
+  .switch-pill.released { background: var(--good); }
+  .switch-pill svg { width: 15px; height: 15px; flex: none; }
+  .switch-detail { color: var(--ink-2); font-size: 12.5px; max-width: 560px; }
+
+  main { max-width: 1280px; margin: 0 auto; padding: 16px; display: grid; gap: 16px; }
+  .two { display: grid; gap: 16px; grid-template-columns: repeat(auto-fit, minmax(340px, 1fr)); }
+  section.panel { background: var(--surface); border: 1px solid var(--line); border-radius: 8px; padding: 14px 16px 16px; min-width: 0; }
+  .panel h2 { font-size: 15px; margin: 0 0 2px; }
+  .panel .hint { color: var(--ink-2); font-size: 12.5px; margin: 0 0 12px; }
+  .empty { color: var(--ink-2); padding: 8px 0; }
+
+  /* ---- chart ---- */
+  #chart { position: relative; }
+  #chart svg { display: block; width: 100%; height: auto; }
+  .axis text, .band-label { fill: var(--muted); font-size: 11px; }
+  .band-label.strong { fill: var(--ink-2); font-weight: 700; letter-spacing: 0.06em; }
+  .grid line { stroke: var(--line); stroke-width: 1; }
+  .tip {
+    position: absolute; pointer-events: none; background: var(--surface); color: var(--ink);
+    border: 1px solid var(--line); border-radius: 6px; padding: 7px 9px; font-size: 12px;
+    box-shadow: 0 4px 14px rgba(0,0,0,0.14); white-space: nowrap; display: none;
+  }
+  .tip b { display: block; margin-bottom: 3px; }
+  .tip span { color: var(--ink-2); }
+  details { margin-top: 10px; }
+  details summary { cursor: pointer; color: var(--ink-2); font-size: 12.5px; }
+
+  /* ---- tables ---- */
+  .scroll { overflow-x: auto; }
+  table { border-collapse: collapse; width: 100%; font-size: 13px; }
+  th, td { padding: 6px 10px; border-bottom: 1px solid var(--line); text-align: left; }
+  th { color: var(--ink-2); font-weight: 600; font-size: 12px; white-space: nowrap; }
+  tbody tr:last-child td { border-bottom: 0; }
+  .pos { color: var(--good-text); } .neg { color: var(--critical-text); }
+  .tag { display: inline-flex; align-items: center; gap: 5px; font-weight: 700; font-size: 12px; white-space: nowrap; }
+  .tag svg { width: 13px; height: 13px; }
+  .tag.pass { color: var(--good-text); } .tag.block { color: var(--critical-text); }
+
+  /* ---- lists ---- */
+  .list { list-style: none; margin: 0; padding: 0; max-height: 440px; overflow-y: auto; }
+  .list > li { padding: 9px 0; border-bottom: 1px solid var(--line); }
+  .list > li:last-child { border-bottom: 0; }
+  .list .head { font-weight: 700; display: flex; gap: 8px; align-items: baseline; flex-wrap: wrap; }
+  .list .meta { color: var(--muted); font-weight: 500; font-size: 12px; }
+  .list ul { margin: 4px 0 0; padding-left: 18px; color: var(--ink-2); }
+  .list p { margin: 4px 0 0; color: var(--ink-2); }
+
+  /* ---- paper panel ---- */
+  .rules { display: grid; gap: 10px; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); margin-bottom: 14px; }
+  .rule { border: 1px solid var(--line); border-radius: 6px; padding: 9px 11px; }
+  .rule .k { color: var(--ink-2); font-size: 12px; }
+  .rule .v { font-weight: 700; font-size: 15px; }
+  .stats { display: grid; gap: 10px; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); margin: 10px 0 14px; }
+  .stat .k { color: var(--ink-2); font-size: 12px; } .stat .v { font-size: 20px; font-weight: 700; font-variant-numeric: tabular-nums; }
+  footer { max-width: 1280px; margin: 0 auto; padding: 0 16px 28px; color: var(--muted); font-size: 12px; }
+</style>
+</head>
+<body>
+
+<div class="top">
+  <div class="banner" role="alert">PAPER TRADING ONLY<small>Simulated orders. No broker, no exchange, no real money.</small></div>
+  <div class="statusbar">
+    <div>
+      <h1 id="title">Trading Terminal</h1>
+      <div class="sub" id="subtitle">Loading data...</div>
+    </div>
+    <div class="switch" aria-live="polite">
+      <span class="switch-pill engaged" id="switch-pill">KILL SWITCH: CHECKING</span>
+      <span class="switch-detail" id="switch-detail"></span>
+    </div>
+  </div>
+</div>
+
+<main>
+  <section class="panel" aria-labelledby="h-chart">
+    <h2 id="h-chart">Price and data windows</h2>
+    <p class="hint" id="chart-hint"></p>
+    <div id="chart"></div>
+    <details><summary>Show the most recent loaded bars as a table</summary><div class="scroll" id="bars-table"></div></details>
+  </section>
+
+  <section class="panel" aria-labelledby="h-cand">
+    <h2 id="h-cand">Candidates</h2>
+    <p class="hint" id="cand-hint"></p>
+    <div class="scroll" id="candidates"></div>
+  </section>
+
+  <div class="two">
+    <section class="panel" aria-labelledby="h-gate">
+      <h2 id="h-gate">Gate verdicts: blocked</h2>
+      <p class="hint" id="gate-hint"></p>
+      <ul class="list" id="blocks"></ul>
+    </section>
+    <section class="panel" aria-labelledby="h-mem">
+      <h2 id="h-mem">Memory feed</h2>
+      <p class="hint" id="mem-hint"></p>
+      <ul class="list" id="lessons"></ul>
+    </section>
+  </div>
+
+  <section class="panel" aria-labelledby="h-paper">
+    <h2 id="h-paper">Paper execution</h2>
+    <p class="hint">Rules the paper broker enforces on every order. Strategy code cannot change them.</p>
+    <div class="rules" id="rules"></div>
+    <div id="paper-state"></div>
+  </section>
+</main>
+<footer id="footer"></footer>
+
+<script src="data.js"></script>
+<script>
+"use strict";
+
+// ---------- small helpers ----------
+const SVG_NS = "http://www.w3.org/2000/svg";
+function el(tag, attrs, children) {
+  const node = document.createElement(tag);
+  for (const key in (attrs || {})) {
+    if (key === "text") node.textContent = attrs[key]; else node.setAttribute(key, attrs[key]);
+  }
+  (children || []).forEach(child => node.appendChild(typeof child === "string" ? document.createTextNode(child) : child));
+  return node;
+}
+function svg(tag, attrs) {
+  const node = document.createElementNS(SVG_NS, tag);
+  for (const key in (attrs || {})) node.setAttribute(key, attrs[key]);
+  return node;
+}
+function icon(kind) {            // tiny inline icons so status never relies on color alone
+  const paths = {
+    lock: "M4 7V5a4 4 0 0 1 8 0v2h1v7H3V7h1zm2 0h4V5a2 2 0 0 0-4 0v2z",
+    check: "M6.2 11.3 2.9 8l1.2-1.2 2.1 2.1 5.7-5.7L13.1 4.4z",
+    cross: "M4.2 3 8 6.8 11.8 3 13 4.2 9.2 8l3.8 3.8-1.2 1.2L8 9.2 4.2 13 3 11.8 6.8 8 3 4.2z",
+    stop: "M5 1h6l4 4v6l-4 4H5l-4-4V5zM4.5 7v2h7V7z"
+  };
+  const s = svg("svg", { viewBox: "0 0 16 16", "aria-hidden": "true" });
+  const p = svg("path", { d: paths[kind], fill: "currentColor" });
+  s.appendChild(p);
+  return s;
+}
+const pct = v => (v > 0 ? "+" : "") + v.toFixed(2) + "%";
+const money = v => "$" + v.toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+const shortTime = iso => iso.slice(5, 10).replace("-", "/") + " " + iso.slice(11, 16);
+const ms = iso => Date.parse(iso);
+
+// ---------- kill switch: always on screen, re-read every few seconds ----------
+let lastSwitchRead = null;
+window.onKillSwitch = function (state) {
+  lastSwitchRead = new Date();
+  const pill = document.getElementById("switch-pill");
+  const detail = document.getElementById("switch-detail");
+  const engaged = !state || state.engaged !== false;     // anything unclear counts as engaged
+  pill.className = "switch-pill " + (engaged ? "engaged" : "released");
+  pill.textContent = "";
+  pill.appendChild(icon(engaged ? "stop" : "check"));
+  pill.appendChild(document.createTextNode(engaged ? "KILL SWITCH: ENGAGED - trading stopped"
+                                                   : "KILL SWITCH: RELEASED - paper trading allowed"));
+  const parts = [];
+  if (!state) parts.push("State file not found, so the switch is treated as engaged. Run: python kill_switch.py status");
+  else {
+    parts.push(state.reason);
+    parts.push(state.changed_at
+      ? "Changed " + state.changed_at.replace("T", " ").replace("Z", " UTC") + " by " + state.changed_by + "."
+      : "Never changed (" + state.changed_by + ").");
+  }
+  parts.push("Last read " + lastSwitchRead.toLocaleTimeString() + ".");
+  detail.textContent = parts.join(" ");
+};
+function readKillSwitch() {
+  const old = document.getElementById("ks-script");
+  if (old) old.remove();
+  const tag = document.createElement("script");
+  tag.id = "ks-script";
+  tag.src = "kill_switch_state.js?t=" + Date.now();      // a local file; the query only defeats caching
+  tag.onerror = () => window.onKillSwitch(null);
+  document.body.appendChild(tag);
+}
+readKillSwitch();
+setInterval(readKillSwitch, 5000);
+
+// ---------- panel 1: price chart with windows ----------
+function drawChart(data) {
+  const host = document.getElementById("chart");
+  host.textContent = "";
+  const bars = data.bars, windows = data.windows;
+  if (!bars.length || !windows.length) { host.appendChild(el("p", { class: "empty", text: "No bars found." })); return; }
+
+  const W = Math.max(host.clientWidth, 320), H = 340;
+  const m = { top: 30, right: 16, bottom: 30, left: 58 };
+  const t0 = ms(windows[0].first_timestamp);
+  const barMs = data.interval_minutes * 60000;
+  const t1 = ms(windows[windows.length - 1].last_timestamp) + barMs;
+  const lows = bars.map(b => b[3]), highs = bars.map(b => b[2]);
+  let yMin = Math.min.apply(null, lows), yMax = Math.max.apply(null, highs);
+  const pad = (yMax - yMin) * 0.06; yMin -= pad; yMax += pad;
+  const x = t => m.left + (t - t0) / (t1 - t0) * (W - m.left - m.right);
+  const y = v => m.top + (yMax - v) / (yMax - yMin) * (H - m.top - m.bottom);
+
+  const root = svg("svg", { viewBox: `0 0 ${W} ${H}`, role: "img",
+    "aria-label": `${data.pair} closing price over the train and validation windows; the test window is locked and shows no prices` });
+
+  // Hatch pattern for the locked window.
+  const defs = svg("defs");
+  const pattern = svg("pattern", { id: "hatch", width: 8, height: 8, patternUnits: "userSpaceOnUse", patternTransform: "rotate(45)" });
+  pattern.appendChild(svg("line", { x1: 0, y1: 0, x2: 0, y2: 8, stroke: "var(--muted)", "stroke-width": 1.2, opacity: 0.45 }));
+  defs.appendChild(pattern); root.appendChild(defs);
+
+  // Window bands with direct labels.
+  windows.forEach((w, i) => {
+    const xa = x(ms(w.first_timestamp)), xb = x(ms(w.last_timestamp) + barMs);
+    root.appendChild(svg("rect", { x: xa, y: m.top, width: xb - xa, height: H - m.top - m.bottom,
+      fill: w.locked ? "url(#hatch)" : (i % 2 ? "var(--band-alt)" : "var(--band)") }));
+    if (i > 0) root.appendChild(svg("line", { x1: xa, x2: xa, y1: m.top - 14, y2: H - m.bottom, stroke: "var(--muted)", "stroke-width": 1, "stroke-dasharray": "3 3" }));
+    const label = svg("text", { x: xa + 6, y: m.top - 16, class: "band-label strong" });
+    label.textContent = w.name.toUpperCase() + (w.locked ? " - LOCKED" : "");
+    root.appendChild(label);
+    const sub = svg("text", { x: xa + 6, y: m.top - 4, class: "band-label" });
+    sub.textContent = w.bars + " bars";
+    root.appendChild(sub);
+    if (w.locked) {
+      const cx = (xa + xb) / 2, cy = (m.top + H - m.bottom) / 2;
+      const g = svg("g", { transform: `translate(${cx - 11}, ${cy - 30}) scale(1.4)`, style: "color: var(--ink-2)" });
+      g.appendChild(svg("path", { d: "M4 7V5a4 4 0 0 1 8 0v2h1v7H3V7h1zm2 0h4V5a2 2 0 0 0-4 0v2z", fill: "currentColor" }));
+      root.appendChild(g);
+      [["Locked", 8, "strong"], ["Prices not loaded", 24, ""]].forEach(([text, dy, cls]) => {
+        const tnode = svg("text", { x: cx, y: cy + dy, "text-anchor": "middle", class: "band-label " + cls });
+        tnode.textContent = text; root.appendChild(tnode);
+      });
+    }
+  });
+
+  // Recessive grid and axes.
+  const grid = svg("g", { class: "grid" }), axis = svg("g", { class: "axis" });
+  const step = [1, 2, 5, 10, 20, 25, 50, 100, 200].find(s => (yMax - yMin) / s <= 6) || 500;
+  for (let v = Math.ceil(yMin / step) * step; v <= yMax; v += step) {
+    grid.appendChild(svg("line", { x1: m.left, x2: W - m.right, y1: y(v), y2: y(v) }));
+    const tnode = svg("text", { x: m.left - 8, y: y(v) + 4, "text-anchor": "end" });
+    tnode.textContent = v.toLocaleString("en-US"); axis.appendChild(tnode);
+  }
+  const hourMs = 3600000, tickEvery = (W < 640 ? 24 : 12) * hourMs;
+  for (let t = Math.ceil(t0 / tickEvery) * tickEvery; t < t1; t += tickEvery) {
+    const d = new Date(t).toISOString();
+    const tnode = svg("text", { x: x(t), y: H - m.bottom + 16, "text-anchor": "middle" });
+    tnode.textContent = shortTime(d) + " UTC"; axis.appendChild(tnode);
+  }
+  root.appendChild(grid); root.appendChild(axis);
+
+  // The price line: one series, so the title names it and no legend is needed.
+  const points = bars.map(b => `${x(ms(b[0]) + barMs / 2).toFixed(1)},${y(b[4]).toFixed(1)}`).join(" ");
+  root.appendChild(svg("polyline", { points, fill: "none", stroke: "var(--series)", "stroke-width": 2, "stroke-linejoin": "round", "stroke-linecap": "round" }));
+  const last = bars[bars.length - 1];
+  const endLabel = svg("text", { x: x(ms(last[0]) + barMs / 2) - 6, y: y(last[4]) - 22, "text-anchor": "end", class: "band-label strong" });
+  endLabel.textContent = last[4].toLocaleString("en-US", { minimumFractionDigits: 2 });
+  root.appendChild(endLabel);
+
+  // Hover layer: crosshair, marker and tooltip.
+  const cross = svg("line", { y1: m.top, y2: H - m.bottom, stroke: "var(--ink-2)", "stroke-width": 1, visibility: "hidden" });
+  const dot = svg("circle", { r: 4.5, fill: "var(--series)", stroke: "var(--surface)", "stroke-width": 2, visibility: "hidden" });
+  root.appendChild(cross); root.appendChild(dot);
+  const tip = el("div", { class: "tip" });
+  const hit = svg("rect", { x: m.left, y: m.top, width: W - m.left - m.right, height: H - m.top - m.bottom, fill: "transparent" });
+  root.appendChild(hit);
+  const lastLoaded = ms(last[0]) + barMs;
+  function move(event) {
+    const box = root.getBoundingClientRect();
+    const px = (event.clientX - box.left) * (W / box.width);
+    const t = t0 + (px - m.left) / (W - m.left - m.right) * (t1 - t0);
+    tip.textContent = "";
+    if (t >= lastLoaded) {                       // over the locked window: nothing to read
+      cross.setAttribute("visibility", "hidden"); dot.setAttribute("visibility", "hidden");
+      tip.appendChild(el("b", { text: "Test window: locked" }));
+      tip.appendChild(el("span", { text: "Prices are not loaded until the owner unlocks it." }));
+    } else {
+      const i = Math.max(0, Math.min(bars.length - 1, Math.floor((t - t0) / barMs)));
+      const b = bars[i], bx = x(ms(b[0]) + barMs / 2);
+      cross.setAttribute("x1", bx); cross.setAttribute("x2", bx); cross.setAttribute("visibility", "visible");
+      dot.setAttribute("cx", bx); dot.setAttribute("cy", y(b[4])); dot.setAttribute("visibility", "visible");
+      const win = windows.find(w => b[0] >= w.first_timestamp && b[0] <= w.last_timestamp);
+      tip.appendChild(el("b", { text: b[0].replace("T", " ").replace(":00Z", " UTC") }));
+      tip.appendChild(el("span", { text: `Open ${b[1].toFixed(2)}   High ${b[2].toFixed(2)}   Low ${b[3].toFixed(2)}   Close ${b[4].toFixed(2)}` }));
+      tip.appendChild(el("div", { text: (win ? win.name : "") + " window" }));
+    }
+    tip.style.display = "block";
+    const hostBox = host.getBoundingClientRect();
+    let left = event.clientX - hostBox.left + 14;
+    if (left + tip.offsetWidth > hostBox.width) left = event.clientX - hostBox.left - tip.offsetWidth - 14;
+    tip.style.left = Math.max(0, left) + "px";
+    tip.style.top = Math.max(0, event.clientY - hostBox.top - tip.offsetHeight - 10) + "px";
+  }
+  hit.addEventListener("pointermove", move);
+  hit.addEventListener("pointerleave", () => { tip.style.display = "none"; cross.setAttribute("visibility", "hidden"); dot.setAttribute("visibility", "hidden"); });
+  host.appendChild(root); host.appendChild(tip);
+}
+
+function drawBarsTable(data) {
+  const rows = data.bars.slice(-12).reverse();
+  const table = el("table", {}, [el("thead", {}, [el("tr", {}, ["Time (UTC)", "Open", "High", "Low", "Close"].map((h, i) => el("th", { text: h, class: i ? "num" : "" })))])]);
+  const body = el("tbody");
+  rows.forEach(b => body.appendChild(el("tr", {}, [el("td", { text: b[0].replace("T", " ").replace(":00Z", "") })]
+    .concat([1, 2, 3, 4].map(i => el("td", { class: "num", text: b[i].toFixed(2) }))))));
+  table.appendChild(body);
+  document.getElementById("bars-table").appendChild(table);
+}
+
+// ---------- panel 2: candidate table ----------
+function verdictTag(verdict) {
+  const pass = verdict === "PASS";
+  const tag = el("span", { class: "tag " + (pass ? "pass" : "block") });
+  tag.appendChild(icon(pass ? "check" : "cross"));
+  tag.appendChild(document.createTextNode(verdict));
+  return tag;
+}
+function drawCandidates(data) {
+  const host = document.getElementById("candidates");
+  const g = data.gate_thresholds;
+  document.getElementById("cand-hint").textContent =
+    `${data.candidates.length} candidates, backtested on train and validation only. Returns are after fees. ` +
+    `Gate: both returns above 0%, gap at most ${g.max_return_gap_pct_points} points, validation drawdown at most ` +
+    `${g.max_validation_drawdown_pct}%, at least ${g.min_validation_trades} validation trades.`;
+  const heads = [["Candidate", ""], ["Train return", "num"], ["Validation return", "num"], ["Validation drawdown", "num"], ["Validation trades", "num"], ["Verdict", ""]];
+  const table = el("table", {}, [el("thead", {}, [el("tr", {}, heads.map(h => el("th", { text: h[0], class: h[1] })))])]);
+  const body = el("tbody");
+  data.candidates.forEach(c => {
+    const sign = v => "num " + (v > 0 ? "pos" : v < 0 ? "neg" : "");
+    const row = el("tr", {}, [
+      el("td", {}, [el("code", { text: c.name })]),
+      el("td", { class: sign(c.train_return_pct), text: pct(c.train_return_pct) }),
+      el("td", { class: sign(c.validation_return_pct), text: pct(c.validation_return_pct) }),
+      el("td", { class: "num", text: c.validation_drawdown_pct.toFixed(2) + "%" }),
+      el("td", { class: "num", text: String(c.validation_trades) }),
+      el("td", {}, [verdictTag(c.verdict)])
+    ]);
+    body.appendChild(row);
+  });
+  table.appendChild(body); host.appendChild(table);
+}
+
+// ---------- panel 3: every BLOCK with its reasons ----------
+function drawBlocks(data) {
+  const blocked = data.candidates.filter(c => c.verdict === "BLOCK");
+  const passed = data.candidates.length - blocked.length;
+  document.getElementById("gate-hint").textContent =
+    `${blocked.length} blocked, ${passed} passed. Every failed check is listed, not only the first.`;
+  const list = document.getElementById("blocks");
+  if (!blocked.length) { list.appendChild(el("li", { class: "empty", text: "Nothing is blocked." })); return; }
+  blocked.forEach(c => {
+    const reasons = el("ul", {}, c.failures.map(f => el("li", { text: f })));
+    list.appendChild(el("li", {}, [el("div", { class: "head" }, [verdictTag("BLOCK"), el("code", { text: c.name })]), reasons]));
+  });
+}
+
+// ---------- panel 4: memory feed ----------
+function drawMemory(data) {
+  const memory = data.memory, list = document.getElementById("lessons");
+  const hint = document.getElementById("mem-hint");
+  if (!memory.available) { hint.textContent = memory.note; return; }
+  hint.textContent = `${memory.total} lesson(s) stored in mem0, newest round first. One lesson per blocked candidate.`;
+  if (!memory.lessons.length) { list.appendChild(el("li", { class: "empty", text: "Memory is empty." })); return; }
+  memory.lessons.forEach(l => {
+    list.appendChild(el("li", {}, [
+      el("div", { class: "head" }, [el("code", { text: l.candidate }), el("span", { class: "meta", text: `round ${l.round} - ${l.family}` })]),
+      el("p", { text: l.failed_checks.split(" | ").join("; ") })
+    ]));
+  });
+}
+
+// ---------- paper execution ----------
+function drawPaper(data) {
+  const s = data.paper.settings, rules = document.getElementById("rules");
+  [["Order types", "Limit orders only"],
+   ["Stop on every trade", s.stop_pct + "% below entry"],
+   ["Daily loss cap", s.daily_loss_cap_pct + "% of the day's start"],
+   ["Kill switch", "Separate module; release by owner only"],
+   ["Paper capital", money(s.starting_cash)],
+   ["Fee", s.fee_bps_per_side + " bps per side"]
+  ].forEach(r => rules.appendChild(el("div", { class: "rule" }, [el("div", { class: "k", text: r[0] }), el("div", { class: "v", text: r[1] })])));
+
+  const host = document.getElementById("paper-state"), state = data.paper.state;
+  if (data.strategy_isolation_problems.length) {
+    host.appendChild(el("p", { class: "neg", text: "Strategy isolation check FAILED: " + data.strategy_isolation_problems.join("; ") }));
+  } else {
+    host.appendChild(el("p", { class: "hint", text: "Strategy isolation check passed: strategy code does not import the kill switch or the broker." }));
+  }
+  if (!state) { host.appendChild(el("p", { class: "empty", text: "No paper run yet. Run: python paper.py --candidate \"<name>\"" })); return; }
+  const sum = state.summary;
+  host.appendChild(el("p", {}, [el("b", { text: "Last paper run: " }), el("code", { text: state.candidate }),
+    document.createTextNode(` - ${state.mode}. ${state.window.bars} bars, ${shortTime(state.window.first_timestamp)} to ${shortTime(state.window.last_timestamp)} UTC. Saved ${state.saved_at.replace("T", " ").replace("Z", " UTC")}.`)]));
+  const stats = el("div", { class: "stats" });
+  [["Paper equity", money(sum.equity)], ["Return", pct(sum.return_pct)], ["Orders submitted", sum.orders_submitted],
+   ["Filled", sum.orders_filled], ["Refused by kill switch", sum.orders_refused_by_kill_switch],
+   ["Round trips", sum.round_trips], ["Stopped out", sum.stopped_out]
+  ].forEach(r => stats.appendChild(el("div", { class: "stat" }, [el("div", { class: "k", text: r[0] }), el("div", { class: "v", text: String(r[1]) })])));
+  host.appendChild(stats);
+
+  if (state.trades.length) {
+    const table = el("table", {}, [el("thead", {}, [el("tr", {}, [["Entry (UTC)", ""], ["Entry price", "num"], ["Stop", "num"], ["Exit (UTC)", ""], ["Exit price", "num"], ["Exit reason", ""], ["Return", "num"]].map(h => el("th", { text: h[0], class: h[1] })))])]);
+    const body = el("tbody");
+    state.trades.forEach(t => body.appendChild(el("tr", {}, [
+      el("td", { text: shortTime(t.entry_time) }), el("td", { class: "num", text: t.entry_price.toFixed(2) }),
+      el("td", { class: "num", text: t.stop_price.toFixed(2) }), el("td", { text: shortTime(t.exit_time) }),
+      el("td", { class: "num", text: t.exit_price.toFixed(2) }), el("td", { text: t.exit_reason }),
+      el("td", { class: "num " + (t.return_pct >= 0 ? "pos" : "neg"), text: pct(t.return_pct) })])));
+    table.appendChild(body);
+    host.appendChild(el("div", { class: "scroll" }, [table]));
+  }
+  const events = state.events.slice(-8).reverse();
+  if (events.length) {
+    host.appendChild(el("p", { class: "hint", text: `Latest broker events (${state.events.length} in total):` }));
+    host.appendChild(el("ul", { class: "list" }, events.map(e => el("li", {}, [
+      el("div", { class: "head" }, [document.createTextNode(e.kind), el("span", { class: "meta", text: shortTime(e.time) + " UTC" })]),
+      el("p", { text: e.detail })]))));
+  }
+}
+
+// ---------- start ----------
+(function start() {
+  const data = window.TERMINAL_DATA;
+  if (!data) {
+    document.getElementById("subtitle").textContent = "data.js not found. Run: python build_view.py";
+    return;
+  }
+  const loaded = data.windows.filter(w => !w.locked).map(w => w.name).join(" + ");
+  document.getElementById("title").textContent = `Trading Terminal - ${data.pair} - ${data.interval_minutes} min bars`;
+  document.getElementById("subtitle").textContent =
+    `Snapshot built ${data.generated_at.replace("T", " ").replace("Z", " UTC")}. Re-run python build_view.py to refresh.`;
+  document.getElementById("chart-hint").textContent =
+    `Closing price, ${data.bars.length} bars loaded (${loaded}). The test window is locked: its dates are marked, its prices are not loaded.`;
+  drawChart(data); drawBarsTable(data); drawCandidates(data); drawBlocks(data); drawMemory(data); drawPaper(data);
+  let timer = null;
+  window.addEventListener("resize", () => { clearTimeout(timer); timer = setTimeout(() => drawChart(data), 120); });
+  document.getElementById("footer").textContent =
+    "Static page: no server and no network calls. Data comes from data.js and kill_switch_state.js in this folder. " +
+    "Past backtest and paper results are not evidence of future results.";
+})();
+</script>
+</body>
+</html>
