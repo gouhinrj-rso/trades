@@ -1,0 +1,15 @@
+[
+ {
+  "round": 1,
+  "proposed": 18,
+  "skipped_by_memory": 0,
+  "tested": 18,
+  "passed": 1,
+  "blocked": 17,
+  "passed_candidates": [
+   "zscore(window=80, entry=1.5)"
+  ],
+  "lessons_saved": 17,
+  "lessons_in_memory": 17
+ }
+]

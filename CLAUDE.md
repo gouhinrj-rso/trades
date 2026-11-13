@@ -59,6 +59,9 @@ It was copied from `gouhinrj-rso/claude` (`trading-terminal/`) on 2026-11-13.
   `optimizer_trials.jsonl`). Memory now starts empty, there are no saved prompts, and the next round is
   round 1. Nothing reads the archive. The old 5-minute period (Nov 10-12) sits inside the new locked test
   window, so never copy lessons or prompts back from the archive.
+- Round 1 on the 1-hour data ran on 2026-11-13 (fixed grid, no model calls): 1 passed, 17 blocked, 17 lessons
+  saved. Memory now rules out the whole EMA crossover family (all 9 blocked, every one on train return and
+  validation drawdown).
 - Result on 1-hour bars with unchanged thresholds: 1 of 18 grid candidates passes the gate
   (`zscore(window=80, entry=1.5)`); on the 5-minute data 5 passed, and none of those 5 passes now.
 
