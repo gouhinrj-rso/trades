@@ -104,7 +104,7 @@ FAMILY_SPECS = {
 
 # Version 1 of the prompt: where every optimization starts from.
 BASELINE_INSTRUCTIONS = (
-    "You propose trading strategy candidates for a backtest on 5-minute price bars. "
+    "You propose trading strategy candidates for a backtest on 1-hour price bars. "
     "Read the lessons from memory first. Each lesson records a candidate that a risk gate "
     "blocked, the exact check it failed and the numbers behind it. Do not propose a family or "
     "a parameter set that already failed the same way. Use only the allowed families and keep "

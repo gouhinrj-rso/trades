@@ -54,11 +54,11 @@ It was copied from `gouhinrj-rso/claude` (`trading-terminal/`) on 2026-11-13.
   Its test file was never opened and is still locked. Nothing reads this folder.
 - Strategy parameters are counted in bars, so the same candidate name means a different strategy on
   1-hour bars than it did on 5-minute bars (`window=40` is 40 hours now, 200 minutes before).
-- **Stale since the switch to 1-hour bars (2026-11-13), pending an owner decision:** the 17 lessons in
-  `memory_store/`, prompts v1-v9 in `prompts/`, `data/rounds.json` and `data/optimizer_trials.jsonl` all
-  come from the 5-minute data. Do not run `run_round.py`, `run_rounds.py` or `optimizer.py` until the owner
-  says whether to reset or tag them: memory would wrongly skip candidates by name. The old 5-minute period
-  (Nov 10-12) also sits inside the new locked test window.
+- **Reset on 2026-11-13 at the owner's request.** Memory, prompts and round logs built on the 5-minute data
+  were moved to `data/archive_5m/` (`memory_store/`, `lessons.json`, `prompts/`, `rounds.json`,
+  `optimizer_trials.jsonl`). Memory now starts empty, there are no saved prompts, and the next round is
+  round 1. Nothing reads the archive. The old 5-minute period (Nov 10-12) sits inside the new locked test
+  window, so never copy lessons or prompts back from the archive.
 - Result on 1-hour bars with unchanged thresholds: 1 of 18 grid candidates passes the gate
   (`zscore(window=80, entry=1.5)`); on the 5-minute data 5 passed, and none of those 5 passes now.
 
@@ -94,14 +94,10 @@ that already failed the same way.
   writes is executed.
 - `TT_ANTHROPIC_API_BASE` (default `https://api.anthropic.com/v1`) is passed to DSPy explicitly. DSPy
   appends only `/messages`, so an `ANTHROPIC_BASE_URL` without `/v1` gives HTTP 404 on every call.
-- First real run 2026-11-13 (20 trials, Sonnet 5.5 proposer, Opus 5.5 reflection): the baseline (v1)
-  stayed best (train 8, validation 10). The one rewrite (v2) scored train 14, validation 7 and was
-  flagged as overfitting: it had copied specific train-window parameter values into the prompt.
-- The rewrite (reflection) model now runs with caching off, so each rewrite step is a fresh call.
-- Three-round run 2026-11-13 (`run_rounds.py`, rounds 3-5 in `data/rounds.json`): passed 6, 6, 8 of 8;
-  blocked 2, 2, 0; memory grew from 13 to 17 lessons. All seven rewritten prompts (v3-v9) were flagged as
-  overfitting and v1 stayed best. In rounds 4 and 5 v1 scored 14 of a possible 14 on validation, so the
-  metric is at its ceiling and no rewrite can be promoted until the metric or the data changes.
+- History on the 5-minute data (archived): one 20-trial run and a three-round run produced eight rewritten
+  prompts, all flagged as overfitting; the baseline stayed best and hit the metric's ceiling (14 of 14).
+  No optimization has been run on the 1-hour data yet.
+- The rewrite (reflection) model runs with caching off, so each rewrite step is a fresh call.
 
 ## Paper execution and the kill switch
 
