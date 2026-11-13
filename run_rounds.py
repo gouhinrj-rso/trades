@@ -180,7 +180,7 @@ def print_side_by_side(records: list) -> None:
         return "no better prompt"
 
     rows = [
-        ("prompt version used", lambda r: f"v{r['prompt_version']}"),
+        ("prompt version used", lambda r: f"v{r['prompt_version']}" if r["prompt_version"] else "baseline"),
         ("lessons in memory at start", lambda r: r["lessons_at_start"]),
         ("proposed by the model", lambda r: r["proposed"]),
         ("invalid", lambda r: r["invalid"]),

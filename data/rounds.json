@@ -11,5 +11,239 @@
   ],
   "lessons_saved": 17,
   "lessons_in_memory": 17
+ },
+ {
+  "round": 2,
+  "run_position": 1,
+  "proposer": "model",
+  "prompt_version": null,
+  "lessons_at_start": 17,
+  "proposed": 8,
+  "proposed_valid": [
+   "zscore(window=60, entry=1.0)",
+   "zscore(window=60, entry=1.5)",
+   "zscore(window=80, entry=1.5)",
+   "zscore(window=100, entry=1.0)",
+   "zscore(window=100, entry=1.5)",
+   "zscore(window=120, entry=1.2)",
+   "zscore(window=50, entry=1.2)",
+   "zscore(window=150, entry=1.0)"
+  ],
+  "invalid": 0,
+  "skipped_by_memory": 0,
+  "skipped_names": [],
+  "tested": 8,
+  "passed": 1,
+  "blocked": 7,
+  "passed_candidates": [
+   "zscore(window=80, entry=1.5)"
+  ],
+  "blocked_candidates": [
+   "zscore(window=60, entry=1.0)",
+   "zscore(window=60, entry=1.5)",
+   "zscore(window=100, entry=1.0)",
+   "zscore(window=100, entry=1.5)",
+   "zscore(window=120, entry=1.2)",
+   "zscore(window=50, entry=1.2)",
+   "zscore(window=150, entry=1.0)"
+  ],
+  "top_reason": "train/validation gap over 2 points (5 candidate(s))",
+  "lessons_saved": 7,
+  "lessons_in_memory": 24,
+  "proposal_error": null,
+  "optimizer": {
+   "trials": 20,
+   "proposer_requests": 20,
+   "prompts_tried": [
+    {
+     "prompt": "p0",
+     "train": 0,
+     "validation": 2,
+     "judgement": "starting prompt"
+    },
+    {
+     "prompt": "p1",
+     "train": 0,
+     "validation": 0,
+     "judgement": "no_gain"
+    },
+    {
+     "prompt": "p2",
+     "train": 0,
+     "validation": 0,
+     "judgement": "no_gain"
+    },
+    {
+     "prompt": "p3",
+     "train": 0,
+     "validation": 1,
+     "judgement": "no_gain"
+    },
+    {
+     "prompt": "p4",
+     "train": 0,
+     "validation": 1,
+     "judgement": "no_gain"
+    }
+   ],
+   "promoted_version": null,
+   "flagged_versions": []
+  }
+ },
+ {
+  "round": 3,
+  "run_position": 2,
+  "proposer": "model",
+  "prompt_version": 1,
+  "lessons_at_start": 24,
+  "proposed": 8,
+  "proposed_valid": [
+   "zscore(window=100, entry=1.2)",
+   "zscore(window=120, entry=1.0)",
+   "zscore(window=120, entry=1.5)",
+   "zscore(window=150, entry=1.3)",
+   "zscore(window=80, entry=1.5)",
+   "zscore(window=90, entry=1.2)",
+   "zscore(window=70, entry=1.2)",
+   "zscore(window=100, entry=0.8)"
+  ],
+  "invalid": 0,
+  "skipped_by_memory": 0,
+  "skipped_names": [],
+  "tested": 8,
+  "passed": 2,
+  "blocked": 6,
+  "passed_candidates": [
+   "zscore(window=80, entry=1.5)",
+   "zscore(window=70, entry=1.2)"
+  ],
+  "blocked_candidates": [
+   "zscore(window=100, entry=1.2)",
+   "zscore(window=120, entry=1.0)",
+   "zscore(window=120, entry=1.5)",
+   "zscore(window=150, entry=1.3)",
+   "zscore(window=90, entry=1.2)",
+   "zscore(window=100, entry=0.8)"
+  ],
+  "top_reason": "train/validation gap over 2 points (4 candidate(s))",
+  "lessons_saved": 6,
+  "lessons_in_memory": 30,
+  "proposal_error": null,
+  "optimizer": {
+   "trials": 20,
+   "proposer_requests": 20,
+   "prompts_tried": [
+    {
+     "prompt": "p0",
+     "train": 0,
+     "validation": 6,
+     "judgement": "starting prompt"
+    },
+    {
+     "prompt": "p1",
+     "train": 0,
+     "validation": 0,
+     "judgement": "no_gain"
+    },
+    {
+     "prompt": "p2",
+     "train": 0,
+     "validation": 0,
+     "judgement": "no_gain"
+    },
+    {
+     "prompt": "p3",
+     "train": 0,
+     "validation": 1,
+     "judgement": "no_gain"
+    },
+    {
+     "prompt": "p4",
+     "train": 0,
+     "validation": 0,
+     "judgement": "no_gain"
+    }
+   ],
+   "promoted_version": null,
+   "flagged_versions": []
+  }
+ },
+ {
+  "round": 4,
+  "run_position": 3,
+  "proposer": "model",
+  "prompt_version": 1,
+  "lessons_at_start": 30,
+  "proposed": 8,
+  "proposed_valid": [
+   "zscore(window=80, entry=1.5)",
+   "zscore(window=80, entry=1.2)",
+   "zscore(window=70, entry=1.2)",
+   "zscore(window=70, entry=1.5)",
+   "zscore(window=45, entry=1.5)",
+   "zscore(window=40, entry=1.7)",
+   "zscore(window=90, entry=1.5)",
+   "zscore(window=110, entry=1.0)"
+  ],
+  "invalid": 0,
+  "skipped_by_memory": 0,
+  "skipped_names": [],
+  "tested": 8,
+  "passed": 3,
+  "blocked": 5,
+  "passed_candidates": [
+   "zscore(window=80, entry=1.5)",
+   "zscore(window=70, entry=1.2)",
+   "zscore(window=90, entry=1.5)"
+  ],
+  "blocked_candidates": [
+   "zscore(window=80, entry=1.2)",
+   "zscore(window=70, entry=1.5)",
+   "zscore(window=45, entry=1.5)",
+   "zscore(window=40, entry=1.7)",
+   "zscore(window=110, entry=1.0)"
+  ],
+  "top_reason": "train/validation gap over 2 points (3 candidate(s))",
+  "lessons_saved": 5,
+  "lessons_in_memory": 35,
+  "proposal_error": null,
+  "optimizer": {
+   "trials": 20,
+   "proposer_requests": 20,
+   "prompts_tried": [
+    {
+     "prompt": "p0",
+     "train": 0,
+     "validation": 4,
+     "judgement": "starting prompt"
+    },
+    {
+     "prompt": "p1",
+     "train": 0,
+     "validation": 0,
+     "judgement": "no_gain"
+    },
+    {
+     "prompt": "p2",
+     "train": 0,
+     "validation": 1,
+     "judgement": "no_gain"
+    },
+    {
+     "prompt": "p3",
+     "train": 0,
+     "validation": 1,
+     "judgement": "no_gain"
+    },
+    {
+     "prompt": "p4",
+     "train": 0,
+     "validation": 0,
+     "judgement": "no_gain"
+    }
+   ],
+   "promoted_version": null,
+   "flagged_versions": []
+  }
  }
 ]

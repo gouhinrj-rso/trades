@@ -62,6 +62,10 @@ It was copied from `gouhinrj-rso/claude` (`trading-terminal/`) on 2026-11-13.
 - Round 1 on the 1-hour data ran on 2026-11-13 (fixed grid, no model calls): 1 passed, 17 blocked, 17 lessons
   saved. Memory now rules out the whole EMA crossover family (all 9 blocked, every one on train return and
   validation drawdown).
+- Three model-proposer rounds on the 1-hour data ran on 2026-11-13 (rounds 2-4 in `data/rounds.json`):
+  passed 1, 2, 3 of 8 and blocked 7, 6, 5; memory grew from 17 to 35 lessons. Three distinct candidates
+  have passed the gate so far: `zscore(window=80, entry=1.5)`, `zscore(window=70, entry=1.2)` and
+  `zscore(window=90, entry=1.5)`, all neighbours judged on the same six-day validation window.
 - Result on 1-hour bars with unchanged thresholds: 1 of 18 grid candidates passes the gate
   (`zscore(window=80, entry=1.5)`); on the 5-minute data 5 passed, and none of those 5 passes now.
 
@@ -99,7 +103,9 @@ that already failed the same way.
   appends only `/messages`, so an `ANTHROPIC_BASE_URL` without `/v1` gives HTTP 404 on every call.
 - History on the 5-minute data (archived): one 20-trial run and a three-round run produced eight rewritten
   prompts, all flagged as overfitting; the baseline stayed best and hit the metric's ceiling (14 of 14).
-  No optimization has been run on the 1-hour data yet.
+  On the 1-hour data (three 20-trial runs, 2026-11-13) no rewrite beat the baseline, which is saved as v1.
+  The train metric was 0 for every prompt: no proposed candidate passes the gate inside the train window
+  (first two thirds vs last third), so the rewrite model gets only failures as feedback.
 - The rewrite (reflection) model runs with caching off, so each rewrite step is a fresh call.
 
 ## Paper execution and the kill switch
