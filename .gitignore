@@ -1,0 +1,10 @@
+__pycache__/
+*.pyc
+.venv/
+.pytest_cache/
+.env
+.streamlit/secrets.toml
+repos/
+models/
+memory_store/qdrant/.lock
+memory_store/mem0_home/

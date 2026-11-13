@@ -1,0 +1,36 @@
+[
+ {
+  "round": 1,
+  "proposed": 18,
+  "skipped_by_memory": 0,
+  "tested": 18,
+  "passed": 5,
+  "blocked": 13,
+  "passed_candidates": [
+   "zscore(window=20, entry=1.5)",
+   "zscore(window=20, entry=2.0)",
+   "zscore(window=40, entry=1.0)",
+   "zscore(window=40, entry=1.5)",
+   "zscore(window=40, entry=2.0)"
+  ],
+  "lessons_saved": 13,
+  "lessons_in_memory": 13
+ },
+ {
+  "round": 2,
+  "proposed": 18,
+  "skipped_by_memory": 13,
+  "tested": 5,
+  "passed": 5,
+  "blocked": 0,
+  "passed_candidates": [
+   "zscore(window=20, entry=1.5)",
+   "zscore(window=20, entry=2.0)",
+   "zscore(window=40, entry=1.0)",
+   "zscore(window=40, entry=1.5)",
+   "zscore(window=40, entry=2.0)"
+  ],
+  "lessons_saved": 0,
+  "lessons_in_memory": 13
+ }
+]

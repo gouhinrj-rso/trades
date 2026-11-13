@@ -1,0 +1,36 @@
+{
+ "pair": "ETHUSD",
+ "interval_minutes": 5,
+ "source": "https://api.kraken.com/0/public/OHLC",
+ "fetched_at": "2026-11-12T23:11:13Z",
+ "rows_returned_by_kraken": 721,
+ "duplicates_dropped": 0,
+ "unfinished_bars_dropped": 1,
+ "bar_count": 720,
+ "first_timestamp": "2026-11-10T11:10:00Z",
+ "last_timestamp": "2026-11-12T23:05:00Z",
+ "gaps": [],
+ "windows": [
+  {
+   "name": "train",
+   "file": "train_5m.json",
+   "bars": 432,
+   "first_timestamp": "2026-11-10T11:10:00Z",
+   "last_timestamp": "2026-11-11T23:05:00Z"
+  },
+  {
+   "name": "validation",
+   "file": "validation_5m.json",
+   "bars": 144,
+   "first_timestamp": "2026-11-11T23:10:00Z",
+   "last_timestamp": "2026-11-12T11:05:00Z"
+  },
+  {
+   "name": "test (LOCKED)",
+   "file": "test_5m_LOCKED.json",
+   "bars": 144,
+   "first_timestamp": "2026-11-12T11:10:00Z",
+   "last_timestamp": "2026-11-12T23:05:00Z"
+  }
+ ]
+}

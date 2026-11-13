@@ -1,0 +1,14 @@
+# Runtime dependencies
+streamlit
+plotly
+pandas
+
+# Memory of failed ideas (runs locally, no API key)
+mem0ai
+fastembed
+
+# Prompt optimization (needs an LLM key in the environment to run)
+dspy
+
+# Development / testing
+pytest
