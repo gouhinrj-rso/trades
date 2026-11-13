@@ -144,7 +144,21 @@ def scripted_reflection(messages):
                                f"memory has not ruled out."}
 
 
-def test_full_pipeline_logs_both_metrics_and_versions_prompts(tmp_path):
+def score_by_family(raw_candidates, max_candidates, lessons, windows):
+    """Stand-in scoring: every z-score candidate "passes" on both train and validation.
+
+    The pipeline test checks the plumbing, so it must not depend on what real
+    market data happens to reward this week.
+    """
+    valid, rejected = optimizer.clean_proposals(raw_candidates, max_candidates)
+    passes = sum(1 for candidate in valid if candidate["family"] == "zscore_reversion")
+    return {"proposed": len(raw_candidates), "valid": len(valid), "rejected": rejected,
+            "skipped_by_memory": [], "candidates": [],
+            "train_passes": passes, "validation_passes": passes}
+
+
+def test_full_pipeline_logs_both_metrics_and_versions_prompts(tmp_path, monkeypatch):
+    monkeypatch.setattr(optimizer, "score_proposal", score_by_family)
     prompts_dir = tmp_path / "prompts"
     log_file = tmp_path / "trials.jsonl"
 

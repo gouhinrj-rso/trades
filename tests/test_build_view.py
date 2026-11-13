@@ -5,6 +5,7 @@ import json
 
 import build_view
 import engine
+import fetch_data
 
 
 def read_data_file(path):
@@ -27,13 +28,15 @@ def build_in(tmp_path, monkeypatch):
 def test_data_file_has_every_panel(tmp_path, monkeypatch):
     data = build_in(tmp_path, monkeypatch)
 
-    assert len(data["bars"]) == 576                       # train 432 + validation 144
+    loaded = sum(w["bars"] for w in data["windows"] if not w["locked"])
+    assert len(data["bars"]) == loaded > 0                # train + validation, nothing else
     assert len(data["candidates"]) == 18
     row = data["candidates"][0]
     assert set(row) >= {"name", "train_return_pct", "validation_return_pct",
                         "validation_drawdown_pct", "validation_trades", "verdict", "failures"}
     blocked = [r for r in data["candidates"] if r["verdict"] == "BLOCK"]
-    assert len(blocked) == 13 and all(r["failures"] for r in blocked)
+    assert all(r["failures"] for r in blocked)             # every BLOCK carries its reasons
+    assert all(not r["failures"] for r in data["candidates"] if r["verdict"] == "PASS")
     assert data["memory"]["lessons"]
     assert data["paper"]["settings"]["order_types"] == ["limit"]
     assert data["paper"]["settings"]["stop_pct"] == 1.0
@@ -63,4 +66,4 @@ def test_building_the_view_never_opens_the_locked_files(tmp_path, monkeypatch):
     build_in(tmp_path, monkeypatch)
 
     assert any(path.endswith(engine.TRAIN_FILE.name) for path in opened)
-    assert not [path for path in opened if "LOCKED" in path or path.endswith("bars_5m.json")]
+    assert not [path for path in opened if "LOCKED" in path or path.endswith(fetch_data.ALL_BARS_FILE.name)]

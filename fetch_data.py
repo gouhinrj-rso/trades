@@ -1,4 +1,8 @@
-"""Fetch 5-minute OHLC bars from Kraken's public API and split them by time.
+"""Fetch 1-hour OHLC bars from Kraken's public API and split them by time.
+
+Kraken returns at most 720 bars per call, so 1-hour bars give about 30 days.
+(The first version used 5-minute bars: about 2.5 days. Those files are kept,
+unopened test window included, in data/archive_5m/.)
 
 Run from the trading-terminal folder:
 
@@ -16,10 +20,10 @@ Why a rerun does not fetch again by default:
     So a rerun prints the saved report, and you must pass --refresh on purpose.
 
 Files written to data/:
-    bars_5m.json         all cleaned bars (NOTE: this includes the test bars)
-    train_5m.json        first 60% of bars
-    validation_5m.json   next 20% of bars
-    test_5m_LOCKED.json  last 20% of bars - do not open until "unlock test"
+    bars_1h.json         all cleaned bars (NOTE: this includes the test bars)
+    train_1h.json        first 60% of bars
+    validation_1h.json   next 20% of bars
+    test_1h_LOCKED.json  last 20% of bars - do not open until "unlock test"
     split_report.json    range, counts, gaps and window boundaries (no prices)
 """
 
@@ -36,7 +40,7 @@ from pathlib import Path
 # Settings (change the pair here if you want a different asset)
 # ----------------------------------------------------------------------------
 PAIR = "ETHUSD"                # Kraken pair name, e.g. "XBTUSD" for BTC/USD
-INTERVAL_MINUTES = 5           # bar size in minutes
+INTERVAL_MINUTES = 60          # bar size in minutes (60 = 1-hour bars, about 30 days per call)
 BAR_SECONDS = INTERVAL_MINUTES * 60
 KRAKEN_OHLC_URL = "https://api.kraken.com/0/public/OHLC"
 
@@ -45,10 +49,12 @@ VALIDATION_FRACTION = 0.20     # next 20%; the test window is whatever is left
 
 # All output goes in a "data" folder next to this script.
 DATA_DIR = Path(__file__).resolve().parent / "data"
-ALL_BARS_FILE = DATA_DIR / "bars_5m.json"
-TRAIN_FILE = DATA_DIR / "train_5m.json"
-VALIDATION_FILE = DATA_DIR / "validation_5m.json"
-TEST_FILE = DATA_DIR / "test_5m_LOCKED.json"
+# File names carry the bar size, so data of different bar sizes can never be mixed up.
+FILE_LABEL = "1h"
+ALL_BARS_FILE = DATA_DIR / f"bars_{FILE_LABEL}.json"
+TRAIN_FILE = DATA_DIR / f"train_{FILE_LABEL}.json"
+VALIDATION_FILE = DATA_DIR / f"validation_{FILE_LABEL}.json"
+TEST_FILE = DATA_DIR / f"test_{FILE_LABEL}_LOCKED.json"
 REPORT_FILE = DATA_DIR / "split_report.json"
 
 
@@ -254,12 +260,12 @@ def print_report(report: dict, freshly_fetched: bool) -> None:
         )
     print()
     print('The test file stays closed until the owner says "unlock test".')
-    print("bars_5m.json also contains the test bars; later steps must read only")
-    print("train_5m.json and validation_5m.json.")
+    print(f"{ALL_BARS_FILE.name} also contains the test bars; later steps must read only")
+    print(f"{TRAIN_FILE.name} and {VALIDATION_FILE.name}.")
 
 
 def main() -> int:
-    parser = argparse.ArgumentParser(description="Fetch and split Kraken 5-minute bars.")
+    parser = argparse.ArgumentParser(description="Fetch and split Kraken 1-hour bars.")
     parser.add_argument(
         "--refresh",
         action="store_true",

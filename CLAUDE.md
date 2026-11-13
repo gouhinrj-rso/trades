@@ -27,6 +27,7 @@ It was copied from `gouhinrj-rso/claude` (`trading-terminal/`) on 2026-11-13.
 | Build the page data | `python build_view.py` (writes `view/data.js`; then open `view/index.html`, no server) |
 | Paper replay | `python paper.py --candidate "<name>"` (gate-passed candidates only; simulated orders) |
 | Kill switch | `python kill_switch.py status` / `engage "reason"` / `release --confirm` |
+| Run three full rounds | `python run_rounds.py` (model proposes; each round ends with a 20-trial prompt optimization; needs an LLM key; up to 90 model calls) |
 | Show memory | `python memory.py` (prints every stored lesson) |
 | Fetch bars | `python fetch_data.py` (rerun prints the saved report; `--refresh` refetches and replaces every window) |
 
@@ -41,13 +42,25 @@ It was copied from `gouhinrj-rso/claude` (`trading-terminal/`) on 2026-11-13.
 
 ## Data and the locked test window
 
-`fetch_data.py` saves Kraken ETH/USD 5-minute bars to `data/` and splits them by
-time: 60% train, 20% validation, 20% test.
+`fetch_data.py` saves Kraken ETH/USD **1-hour** bars to `data/` (720 bars, about 30 days: 2026-10-14 to
+2026-11-13) and splits them by time: 60% train, 20% validation, 20% test. File names carry the bar size
+(`train_1h.json`, `validation_1h.json`, `test_1h_LOCKED.json`, `bars_1h.json`).
 
-- **Do not open, read, print or load `data/test_5m_LOCKED.json` until the owner says "unlock test".**
-- `data/bars_5m.json` contains every bar, including the test bars. Treat it as locked too: strategy, backtest and optimizer code must read only `data/train_5m.json` and `data/validation_5m.json`.
+- **Do not open, read, print or load `data/test_1h_LOCKED.json` until the owner says "unlock test".**
+- `data/bars_1h.json` contains every bar, including the test bars. Treat it as locked too: strategy, backtest and optimizer code must read only `data/train_1h.json` and `data/validation_1h.json`.
 - `data/split_report.json` holds the range, counts, gaps and window boundaries (no prices). Read that when you need sizes or dates.
 - Do not run `python fetch_data.py --refresh` without the owner asking. It moves all three windows, so old test bars could become training bars.
+- `data/archive_5m/` holds the first data set (5-minute bars, 2026-11-10 to 2026-11-12) and its gate results.
+  Its test file was never opened and is still locked. Nothing reads this folder.
+- Strategy parameters are counted in bars, so the same candidate name means a different strategy on
+  1-hour bars than it did on 5-minute bars (`window=40` is 40 hours now, 200 minutes before).
+- **Reset on 2026-11-13 at the owner's request.** Memory, prompts and round logs built on the 5-minute data
+  were moved to `data/archive_5m/` (`memory_store/`, `lessons.json`, `prompts/`, `rounds.json`,
+  `optimizer_trials.jsonl`). Memory now starts empty, there are no saved prompts, and the next round is
+  round 1. Nothing reads the archive. The old 5-minute period (Nov 10-12) sits inside the new locked test
+  window, so never copy lessons or prompts back from the archive.
+- Result on 1-hour bars with unchanged thresholds: 1 of 18 grid candidates passes the gate
+  (`zscore(window=80, entry=1.5)`); on the 5-minute data 5 passed, and none of those 5 passes now.
 
 ## Memory of failed ideas
 
@@ -81,11 +94,10 @@ that already failed the same way.
   writes is executed.
 - `TT_ANTHROPIC_API_BASE` (default `https://api.anthropic.com/v1`) is passed to DSPy explicitly. DSPy
   appends only `/messages`, so an `ANTHROPIC_BASE_URL` without `/v1` gives HTTP 404 on every call.
-- First real run 2026-11-13 (20 trials, Sonnet 5.5 proposer, Opus 5.5 reflection): the baseline (v1)
-  stayed best (train 8, validation 10). The one rewrite (v2) scored train 14, validation 7 and was
-  flagged as overfitting: it had copied specific train-window parameter values into the prompt.
-- Known weakness: DSPy's response cache returns the same rewrite when the reflection input repeats, so
-  that run produced only one distinct new prompt from three rewrite steps.
+- History on the 5-minute data (archived): one 20-trial run and a three-round run produced eight rewritten
+  prompts, all flagged as overfitting; the baseline stayed best and hit the metric's ceiling (14 of 14).
+  No optimization has been run on the 1-hour data yet.
+- The rewrite (reflection) model runs with caching off, so each rewrite step is a fresh call.
 
 ## Paper execution and the kill switch
 

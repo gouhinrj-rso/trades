@@ -28,17 +28,17 @@ FEE_BPS_PER_SIDE = 2.0          # 2 basis points = 0.02% charged on each buy and
 STARTING_CASH = 10_000.0        # paper money; only the percentage results matter
 
 DATA_DIR = Path(__file__).resolve().parent / "data"
-TRAIN_FILE = DATA_DIR / "train_5m.json"
-VALIDATION_FILE = DATA_DIR / "validation_5m.json"
+TRAIN_FILE = DATA_DIR / "train_1h.json"          # 1-hour bars (see fetch_data.py)
+VALIDATION_FILE = DATA_DIR / "validation_1h.json"
 
 # The only files this engine is allowed to read. The locked test file and the
 # all-bars file (which contains the test bars) are deliberately not on the list.
 ALLOWED_FILES = {TRAIN_FILE.name, VALIDATION_FILE.name}
 
 # Parameter grids. Each combination is one candidate.
-EMA_FAST_PERIODS = [5, 10, 20]          # bars (5 min each): 25 min, 50 min, 100 min
-EMA_SLOW_PERIODS = [30, 60, 120]        # bars: 2.5 h, 5 h, 10 h
-ZSCORE_WINDOWS = [20, 40, 80]           # bars: 100 min, 200 min, 400 min
+EMA_FAST_PERIODS = [5, 10, 20]          # bars (1 hour each): 5 h, 10 h, 20 h
+EMA_SLOW_PERIODS = [30, 60, 120]        # bars: 30 h, 60 h (2.5 days), 120 h (5 days)
+ZSCORE_WINDOWS = [20, 40, 80]           # bars: 20 h, 40 h, 80 h
 ZSCORE_ENTRY_LEVELS = [1.0, 1.5, 2.0]   # enter when z-score drops below minus this
 
 

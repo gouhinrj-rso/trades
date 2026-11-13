@@ -312,11 +312,14 @@ function drawChart(data) {
     const tnode = svg("text", { x: m.left - 8, y: y(v) + 4, "text-anchor": "end" });
     tnode.textContent = v.toLocaleString("en-US"); axis.appendChild(tnode);
   }
-  const hourMs = 3600000, tickEvery = (W < 640 ? 24 : 12) * hourMs;
+  // Pick a tick spacing that gives at most about 8 labels (4 on a phone), whatever the date range.
+  const hourMs = 3600000, wanted = W < 640 ? 4 : 8;
+  const tickEvery = [6, 12, 24, 48, 72, 120, 168, 336, 720].map(h => h * hourMs).find(s => (t1 - t0) / s <= wanted) || 720 * hourMs;
+  const dayTicks = tickEvery >= 24 * hourMs;
   for (let t = Math.ceil(t0 / tickEvery) * tickEvery; t < t1; t += tickEvery) {
     const d = new Date(t).toISOString();
     const tnode = svg("text", { x: x(t), y: H - m.bottom + 16, "text-anchor": "middle" });
-    tnode.textContent = shortTime(d) + " UTC"; axis.appendChild(tnode);
+    tnode.textContent = dayTicks ? d.slice(5, 10).replace("-", "/") : shortTime(d) + " UTC"; axis.appendChild(tnode);
   }
   root.appendChild(grid); root.appendChild(axis);
 

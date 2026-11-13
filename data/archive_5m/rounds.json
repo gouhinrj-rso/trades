@@ -1,0 +1,249 @@
+[
+ {
+  "round": 1,
+  "proposed": 18,
+  "skipped_by_memory": 0,
+  "tested": 18,
+  "passed": 5,
+  "blocked": 13,
+  "passed_candidates": [
+   "zscore(window=20, entry=1.5)",
+   "zscore(window=20, entry=2.0)",
+   "zscore(window=40, entry=1.0)",
+   "zscore(window=40, entry=1.5)",
+   "zscore(window=40, entry=2.0)"
+  ],
+  "lessons_saved": 13,
+  "lessons_in_memory": 13
+ },
+ {
+  "round": 2,
+  "proposed": 18,
+  "skipped_by_memory": 13,
+  "tested": 5,
+  "passed": 5,
+  "blocked": 0,
+  "passed_candidates": [
+   "zscore(window=20, entry=1.5)",
+   "zscore(window=20, entry=2.0)",
+   "zscore(window=40, entry=1.0)",
+   "zscore(window=40, entry=1.5)",
+   "zscore(window=40, entry=2.0)"
+  ],
+  "lessons_saved": 0,
+  "lessons_in_memory": 13
+ },
+ {
+  "round": 3,
+  "run_position": 1,
+  "proposer": "model",
+  "prompt_version": 1,
+  "lessons_at_start": 13,
+  "proposed": 8,
+  "proposed_valid": [
+   "zscore(window=60, entry=1.0)",
+   "zscore(window=60, entry=1.5)",
+   "zscore(window=100, entry=1.0)",
+   "zscore(window=40, entry=1.0)",
+   "zscore(window=80, entry=1.25)",
+   "zscore(window=30, entry=1.5)",
+   "zscore(window=100, entry=1.5)",
+   "zscore(window=50, entry=0.8)"
+  ],
+  "invalid": 0,
+  "skipped_by_memory": 0,
+  "skipped_names": [],
+  "tested": 8,
+  "passed": 6,
+  "blocked": 2,
+  "passed_candidates": [
+   "zscore(window=60, entry=1.0)",
+   "zscore(window=60, entry=1.5)",
+   "zscore(window=100, entry=1.0)",
+   "zscore(window=40, entry=1.0)",
+   "zscore(window=80, entry=1.25)",
+   "zscore(window=30, entry=1.5)"
+  ],
+  "blocked_candidates": [
+   "zscore(window=100, entry=1.5)",
+   "zscore(window=50, entry=0.8)"
+  ],
+  "top_reason": "fewer than 2 validation trades (1 candidate(s))",
+  "lessons_saved": 2,
+  "lessons_in_memory": 15,
+  "proposal_error": null,
+  "optimizer": {
+   "trials": 20,
+   "proposer_requests": 20,
+   "prompts_tried": [
+    {
+     "prompt": "p0",
+     "train": 6,
+     "validation": 11,
+     "judgement": "starting prompt"
+    },
+    {
+     "prompt": "p1",
+     "train": 14,
+     "validation": 9,
+     "judgement": "overfitting"
+    },
+    {
+     "prompt": "p2",
+     "train": 14,
+     "validation": 9,
+     "judgement": "overfitting"
+    },
+    {
+     "prompt": "p3",
+     "train": 14,
+     "validation": 7,
+     "judgement": "overfitting"
+    }
+   ],
+   "promoted_version": null,
+   "flagged_versions": [
+    3,
+    4,
+    5
+   ]
+  }
+ },
+ {
+  "round": 4,
+  "run_position": 2,
+  "proposer": "model",
+  "prompt_version": 1,
+  "lessons_at_start": 15,
+  "proposed": 8,
+  "proposed_valid": [
+   "zscore(window=65, entry=1.0)",
+   "zscore(window=65, entry=1.2)",
+   "zscore(window=100, entry=1.0)",
+   "zscore(window=80, entry=1.2)",
+   "zscore(window=100, entry=1.2)",
+   "zscore(window=50, entry=1.2)",
+   "zscore(window=120, entry=1.0)",
+   "zscore(window=35, entry=1.0)"
+  ],
+  "invalid": 0,
+  "skipped_by_memory": 0,
+  "skipped_names": [],
+  "tested": 8,
+  "passed": 6,
+  "blocked": 2,
+  "passed_candidates": [
+   "zscore(window=65, entry=1.0)",
+   "zscore(window=65, entry=1.2)",
+   "zscore(window=100, entry=1.0)",
+   "zscore(window=80, entry=1.2)",
+   "zscore(window=50, entry=1.2)",
+   "zscore(window=35, entry=1.0)"
+  ],
+  "blocked_candidates": [
+   "zscore(window=100, entry=1.2)",
+   "zscore(window=120, entry=1.0)"
+  ],
+  "top_reason": "fewer than 2 validation trades (2 candidate(s))",
+  "lessons_saved": 2,
+  "lessons_in_memory": 17,
+  "proposal_error": null,
+  "optimizer": {
+   "trials": 20,
+   "proposer_requests": 20,
+   "prompts_tried": [
+    {
+     "prompt": "p0",
+     "train": 6,
+     "validation": 14,
+     "judgement": "starting prompt"
+    },
+    {
+     "prompt": "p1",
+     "train": 12,
+     "validation": 12,
+     "judgement": "overfitting"
+    },
+    {
+     "prompt": "p2",
+     "train": 10,
+     "validation": 14,
+     "judgement": "overfitting"
+    },
+    {
+     "prompt": "p3",
+     "train": 14,
+     "validation": 14,
+     "judgement": "overfitting"
+    }
+   ],
+   "promoted_version": null,
+   "flagged_versions": [
+    6,
+    7,
+    8
+   ]
+  }
+ },
+ {
+  "round": 5,
+  "run_position": 3,
+  "proposer": "model",
+  "prompt_version": 1,
+  "lessons_at_start": 17,
+  "proposed": 8,
+  "proposed_valid": [
+   "zscore(window=80, entry=1.2)",
+   "zscore(window=70, entry=1.0)",
+   "zscore(window=90, entry=1.0)",
+   "zscore(window=60, entry=1.0)",
+   "zscore(window=60, entry=1.2)",
+   "zscore(window=70, entry=1.3)",
+   "zscore(window=40, entry=1.5)",
+   "zscore(window=90, entry=0.8)"
+  ],
+  "invalid": 0,
+  "skipped_by_memory": 0,
+  "skipped_names": [],
+  "tested": 8,
+  "passed": 8,
+  "blocked": 0,
+  "passed_candidates": [
+   "zscore(window=80, entry=1.2)",
+   "zscore(window=70, entry=1.0)",
+   "zscore(window=90, entry=1.0)",
+   "zscore(window=60, entry=1.0)",
+   "zscore(window=60, entry=1.2)",
+   "zscore(window=70, entry=1.3)",
+   "zscore(window=40, entry=1.5)",
+   "zscore(window=90, entry=0.8)"
+  ],
+  "blocked_candidates": [],
+  "top_reason": "none (nothing blocked)",
+  "lessons_saved": 0,
+  "lessons_in_memory": 17,
+  "proposal_error": null,
+  "optimizer": {
+   "trials": 20,
+   "proposer_requests": 20,
+   "prompts_tried": [
+    {
+     "prompt": "p0",
+     "train": 6,
+     "validation": 14,
+     "judgement": "starting prompt"
+    },
+    {
+     "prompt": "p1",
+     "train": 14,
+     "validation": 14,
+     "judgement": "overfitting"
+    }
+   ],
+   "promoted_version": null,
+   "flagged_versions": [
+    9
+   ]
+  }
+ }
+]

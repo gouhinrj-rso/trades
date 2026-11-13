@@ -1,0 +1,229 @@
+{
+ "dataset": "Kraken ETHUSD 5-minute bars, 2026-11-10 to 2026-11-12",
+ "lessons": [
+  {
+   "text": "Round 1: BLOCK ema_cross(fast=10, slow=120) (family ema_crossover; params fast=10, slow=120). Failed checks: train return -2.54% <= 0; validation return +0.00% <= 0; train/validation gap 2.54 pts > 2 pts (train -2.54%, validation +0.00%); validation trade count 0 < 2. Numbers: train return -2.54%, validation return +0.00%, validation max drawdown 0.00%, validation trades 0.",
+   "round": 1,
+   "candidate": "ema_cross(fast=10, slow=120)",
+   "family": "ema_crossover",
+   "failed_checks": "train return -2.54% <= 0 | validation return +0.00% <= 0 | train/validation gap 2.54 pts > 2 pts (train -2.54%, validation +0.00%) | validation trade count 0 < 2",
+   "failure_codes": [
+    "train_return",
+    "validation_return",
+    "return_gap",
+    "validation_trades"
+   ],
+   "family_proposed_in_round": 9,
+   "family_blocked_in_round": 9
+  },
+  {
+   "text": "Round 1: BLOCK ema_cross(fast=10, slow=30) (family ema_crossover; params fast=10, slow=30). Failed checks: train return -0.86% <= 0; validation return -1.79% <= 0; validation max drawdown 1.79% > 1.5%. Numbers: train return -0.86%, validation return -1.79%, validation max drawdown 1.79%, validation trades 6.",
+   "round": 1,
+   "candidate": "ema_cross(fast=10, slow=30)",
+   "family": "ema_crossover",
+   "failed_checks": "train return -0.86% <= 0 | validation return -1.79% <= 0 | validation max drawdown 1.79% > 1.5%",
+   "failure_codes": [
+    "train_return",
+    "validation_return",
+    "validation_drawdown"
+   ],
+   "family_proposed_in_round": 9,
+   "family_blocked_in_round": 9
+  },
+  {
+   "text": "Round 1: BLOCK ema_cross(fast=10, slow=60) (family ema_crossover; params fast=10, slow=60). Failed checks: train return -1.34% <= 0; validation return +0.00% <= 0; validation trade count 0 < 2. Numbers: train return -1.34%, validation return +0.00%, validation max drawdown 0.00%, validation trades 0.",
+   "round": 1,
+   "candidate": "ema_cross(fast=10, slow=60)",
+   "family": "ema_crossover",
+   "failed_checks": "train return -1.34% <= 0 | validation return +0.00% <= 0 | validation trade count 0 < 2",
+   "failure_codes": [
+    "train_return",
+    "validation_return",
+    "validation_trades"
+   ],
+   "family_proposed_in_round": 9,
+   "family_blocked_in_round": 9
+  },
+  {
+   "text": "Round 1: BLOCK ema_cross(fast=20, slow=120) (family ema_crossover; params fast=20, slow=120). Failed checks: train return -2.06% <= 0; validation return +0.00% <= 0; train/validation gap 2.06 pts > 2 pts (train -2.06%, validation +0.00%); validation trade count 0 < 2. Numbers: train return -2.06%, validation return +0.00%, validation max drawdown 0.00%, validation trades 0.",
+   "round": 1,
+   "candidate": "ema_cross(fast=20, slow=120)",
+   "family": "ema_crossover",
+   "failed_checks": "train return -2.06% <= 0 | validation return +0.00% <= 0 | train/validation gap 2.06 pts > 2 pts (train -2.06%, validation +0.00%) | validation trade count 0 < 2",
+   "failure_codes": [
+    "train_return",
+    "validation_return",
+    "return_gap",
+    "validation_trades"
+   ],
+   "family_proposed_in_round": 9,
+   "family_blocked_in_round": 9
+  },
+  {
+   "text": "Round 1: BLOCK ema_cross(fast=20, slow=30) (family ema_crossover; params fast=20, slow=30). Failed checks: train return -0.95% <= 0; validation return -0.52% <= 0. Numbers: train return -0.95%, validation return -0.52%, validation max drawdown 0.56%, validation trades 2.",
+   "round": 1,
+   "candidate": "ema_cross(fast=20, slow=30)",
+   "family": "ema_crossover",
+   "failed_checks": "train return -0.95% <= 0 | validation return -0.52% <= 0",
+   "failure_codes": [
+    "train_return",
+    "validation_return"
+   ],
+   "family_proposed_in_round": 9,
+   "family_blocked_in_round": 9
+  },
+  {
+   "text": "Round 1: BLOCK ema_cross(fast=20, slow=60) (family ema_crossover; params fast=20, slow=60). Failed checks: train return -1.00% <= 0; validation return +0.00% <= 0; validation trade count 0 < 2. Numbers: train return -1.00%, validation return +0.00%, validation max drawdown 0.00%, validation trades 0.",
+   "round": 1,
+   "candidate": "ema_cross(fast=20, slow=60)",
+   "family": "ema_crossover",
+   "failed_checks": "train return -1.00% <= 0 | validation return +0.00% <= 0 | validation trade count 0 < 2",
+   "failure_codes": [
+    "train_return",
+    "validation_return",
+    "validation_trades"
+   ],
+   "family_proposed_in_round": 9,
+   "family_blocked_in_round": 9
+  },
+  {
+   "text": "Round 1: BLOCK ema_cross(fast=5, slow=120) (family ema_crossover; params fast=5, slow=120). Failed checks: train return -2.64% <= 0; validation return +0.00% <= 0; train/validation gap 2.64 pts > 2 pts (train -2.64%, validation +0.00%); validation trade count 0 < 2. Numbers: train return -2.64%, validation return +0.00%, validation max drawdown 0.00%, validation trades 0.",
+   "round": 1,
+   "candidate": "ema_cross(fast=5, slow=120)",
+   "family": "ema_crossover",
+   "failed_checks": "train return -2.64% <= 0 | validation return +0.00% <= 0 | train/validation gap 2.64 pts > 2 pts (train -2.64%, validation +0.00%) | validation trade count 0 < 2",
+   "failure_codes": [
+    "train_return",
+    "validation_return",
+    "return_gap",
+    "validation_trades"
+   ],
+   "family_proposed_in_round": 9,
+   "family_blocked_in_round": 9
+  },
+  {
+   "text": "Round 1: BLOCK ema_cross(fast=5, slow=30) (family ema_crossover; params fast=5, slow=30). Failed checks: train return -0.41% <= 0; validation return -2.04% <= 0; validation max drawdown 2.08% > 1.5%. Numbers: train return -0.41%, validation return -2.04%, validation max drawdown 2.08%, validation trades 6.",
+   "round": 1,
+   "candidate": "ema_cross(fast=5, slow=30)",
+   "family": "ema_crossover",
+   "failed_checks": "train return -0.41% <= 0 | validation return -2.04% <= 0 | validation max drawdown 2.08% > 1.5%",
+   "failure_codes": [
+    "train_return",
+    "validation_return",
+    "validation_drawdown"
+   ],
+   "family_proposed_in_round": 9,
+   "family_blocked_in_round": 9
+  },
+  {
+   "text": "Round 1: BLOCK ema_cross(fast=5, slow=60) (family ema_crossover; params fast=5, slow=60). Failed checks: train return -2.36% <= 0; validation return -0.40% <= 0. Numbers: train return -2.36%, validation return -0.40%, validation max drawdown 0.40%, validation trades 2.",
+   "round": 1,
+   "candidate": "ema_cross(fast=5, slow=60)",
+   "family": "ema_crossover",
+   "failed_checks": "train return -2.36% <= 0 | validation return -0.40% <= 0",
+   "failure_codes": [
+    "train_return",
+    "validation_return"
+   ],
+   "family_proposed_in_round": 9,
+   "family_blocked_in_round": 9
+  },
+  {
+   "text": "Round 1: BLOCK zscore(window=20, entry=1.0) (family zscore_reversion; params window=20, entry=1.0). Failed checks: train return -0.53% <= 0. Numbers: train return -0.53%, validation return +1.36%, validation max drawdown 0.59%, validation trades 8.",
+   "round": 1,
+   "candidate": "zscore(window=20, entry=1.0)",
+   "family": "zscore_reversion",
+   "failed_checks": "train return -0.53% <= 0",
+   "failure_codes": [
+    "train_return"
+   ],
+   "family_proposed_in_round": 9,
+   "family_blocked_in_round": 4
+  },
+  {
+   "text": "Round 1: BLOCK zscore(window=80, entry=1.0) (family zscore_reversion; params window=80, entry=1.0). Failed checks: train/validation gap 2.13 pts > 2 pts (train +2.39%, validation +0.26%). Numbers: train return +2.39%, validation return +0.26%, validation max drawdown 1.06%, validation trades 3.",
+   "round": 1,
+   "candidate": "zscore(window=80, entry=1.0)",
+   "family": "zscore_reversion",
+   "failed_checks": "train/validation gap 2.13 pts > 2 pts (train +2.39%, validation +0.26%)",
+   "failure_codes": [
+    "return_gap"
+   ],
+   "family_proposed_in_round": 9,
+   "family_blocked_in_round": 4
+  },
+  {
+   "text": "Round 1: BLOCK zscore(window=80, entry=1.5) (family zscore_reversion; params window=80, entry=1.5). Failed checks: train return -0.12% <= 0. Numbers: train return -0.12%, validation return +0.38%, validation max drawdown 1.06%, validation trades 2.",
+   "round": 1,
+   "candidate": "zscore(window=80, entry=1.5)",
+   "family": "zscore_reversion",
+   "failed_checks": "train return -0.12% <= 0",
+   "failure_codes": [
+    "train_return"
+   ],
+   "family_proposed_in_round": 9,
+   "family_blocked_in_round": 4
+  },
+  {
+   "text": "Round 1: BLOCK zscore(window=80, entry=2.0) (family zscore_reversion; params window=80, entry=2.0). Failed checks: validation trade count 1 < 2. Numbers: train return +0.47%, validation return +0.10%, validation max drawdown 1.06%, validation trades 1.",
+   "round": 1,
+   "candidate": "zscore(window=80, entry=2.0)",
+   "family": "zscore_reversion",
+   "failed_checks": "validation trade count 1 < 2",
+   "failure_codes": [
+    "validation_trades"
+   ],
+   "family_proposed_in_round": 9,
+   "family_blocked_in_round": 4
+  },
+  {
+   "text": "Round 3: BLOCK zscore(window=100, entry=1.5) (family zscore_reversion; params window=100, entry=1.5). Failed checks: validation trade count 1 < 2. Numbers: train return +0.62%, validation return +0.08%, validation max drawdown 1.06%, validation trades 1.",
+   "round": 3,
+   "candidate": "zscore(window=100, entry=1.5)",
+   "family": "zscore_reversion",
+   "failed_checks": "validation trade count 1 < 2",
+   "failure_codes": [
+    "validation_trades"
+   ],
+   "family_proposed_in_round": 8,
+   "family_blocked_in_round": 2
+  },
+  {
+   "text": "Round 3: BLOCK zscore(window=50, entry=0.8) (family zscore_reversion; params window=50, entry=0.8). Failed checks: train return -0.17% <= 0. Numbers: train return -0.17%, validation return +1.24%, validation max drawdown 0.71%, validation trades 6.",
+   "round": 3,
+   "candidate": "zscore(window=50, entry=0.8)",
+   "family": "zscore_reversion",
+   "failed_checks": "train return -0.17% <= 0",
+   "failure_codes": [
+    "train_return"
+   ],
+   "family_proposed_in_round": 8,
+   "family_blocked_in_round": 2
+  },
+  {
+   "text": "Round 4: BLOCK zscore(window=100, entry=1.2) (family zscore_reversion; params window=100, entry=1.2). Failed checks: validation trade count 1 < 2. Numbers: train return +0.84%, validation return +0.08%, validation max drawdown 1.06%, validation trades 1.",
+   "round": 4,
+   "candidate": "zscore(window=100, entry=1.2)",
+   "family": "zscore_reversion",
+   "failed_checks": "validation trade count 1 < 2",
+   "failure_codes": [
+    "validation_trades"
+   ],
+   "family_proposed_in_round": 8,
+   "family_blocked_in_round": 2
+  },
+  {
+   "text": "Round 4: BLOCK zscore(window=120, entry=1.0) (family zscore_reversion; params window=120, entry=1.0). Failed checks: validation return -0.20% <= 0; validation trade count 1 < 2. Numbers: train return +0.48%, validation return -0.20%, validation max drawdown 1.06%, validation trades 1.",
+   "round": 4,
+   "candidate": "zscore(window=120, entry=1.0)",
+   "family": "zscore_reversion",
+   "failed_checks": "validation return -0.20% <= 0 | validation trade count 1 < 2",
+   "failure_codes": [
+    "validation_return",
+    "validation_trades"
+   ],
+   "family_proposed_in_round": 8,
+   "family_blocked_in_round": 2
+  }
+ ]
+}

@@ -104,7 +104,7 @@ FAMILY_SPECS = {
 
 # Version 1 of the prompt: where every optimization starts from.
 BASELINE_INSTRUCTIONS = (
-    "You propose trading strategy candidates for a backtest on 5-minute price bars. "
+    "You propose trading strategy candidates for a backtest on 1-hour price bars. "
     "Read the lessons from memory first. Each lesson records a candidate that a risk gate "
     "blocked, the exact check it failed and the numbers behind it. Do not propose a family or "
     "a parameter set that already failed the same way. Use only the allowed families and keep "
@@ -673,11 +673,14 @@ def print_plan(plan: dict) -> None:
         print("  Prices used are list prices cached on 2026-11-03; treat the figures as rough.")
 
 
-def make_lm(model_name: str):
-    """Create a DSPy model client. Anthropic models get the full API address."""
+def make_lm(model_name: str, cache: bool = True):
+    """Create a DSPy model client. Anthropic models get the full API address.
+
+    cache=False makes every call a fresh request instead of reusing a saved reply.
+    """
     import dspy
     extra = {"api_base": ANTHROPIC_API_BASE} if model_name.startswith("anthropic/") else {}
-    return dspy.LM(model_name, max_tokens=MAX_TOKENS, num_retries=0, **extra)
+    return dspy.LM(model_name, max_tokens=MAX_TOKENS, num_retries=0, cache=cache, **extra)
 
 
 def missing_key_variable(model_name: str):
