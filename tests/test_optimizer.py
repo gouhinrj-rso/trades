@@ -222,3 +222,26 @@ def test_plan_stays_within_twenty_trials():
 
 def test_default_trial_ceiling_is_twenty():
     assert optimizer.MAX_TRIALS == 20
+
+
+def test_anthropic_requests_go_to_the_v1_messages_address(monkeypatch):
+    # Capture the request instead of sending it; no network call is made.
+    from dspy._vendor.lm15.providers import base
+
+    class Captured(Exception):
+        pass
+
+    seen = {}
+
+    def fake_send(self, request):
+        seen["url"] = request.url
+        raise Captured()
+
+    monkeypatch.setattr(base.BaseProviderLM, "_send", fake_send)
+    monkeypatch.setenv("ANTHROPIC_API_KEY", "placeholder-for-test")
+    monkeypatch.setenv("ANTHROPIC_BASE_URL", "https://api.anthropic.com")   # the form without /v1
+    lm = optimizer.make_lm("anthropic/claude-sonnet-5-5")
+    lm.cache = False
+    with pytest.raises(Exception):
+        lm("hi")
+    assert seen["url"] == "https://api.anthropic.com/v1/messages"

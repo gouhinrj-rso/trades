@@ -53,6 +53,10 @@ REFLECTION_MODEL = os.environ.get("TT_REFLECTION_MODEL", "anthropic/claude-opus-
 MAX_TRIALS = int(os.environ.get("TT_MAX_TRIALS", "20"))
 # Most tokens one model reply may use.
 MAX_TOKENS = int(os.environ.get("TT_LLM_MAX_TOKENS", "16000"))
+# Full address of the Anthropic Messages API, INCLUDING /v1. Set explicitly
+# because DSPy appends only "/messages": an ANTHROPIC_BASE_URL without /v1
+# (the form the Anthropic SDK expects) would otherwise give HTTP 404.
+ANTHROPIC_API_BASE = os.environ.get("TT_ANTHROPIC_API_BASE", "https://api.anthropic.com/v1")
 
 # The environment variable each provider's key must be in. DSPy reads it; we
 # only check that it exists so we can stop with a clear message if it does not.
@@ -669,6 +673,13 @@ def print_plan(plan: dict) -> None:
         print("  Prices used are list prices cached on 2026-11-03; treat the figures as rough.")
 
 
+def make_lm(model_name: str):
+    """Create a DSPy model client. Anthropic models get the full API address."""
+    import dspy
+    extra = {"api_base": ANTHROPIC_API_BASE} if model_name.startswith("anthropic/") else {}
+    return dspy.LM(model_name, max_tokens=MAX_TOKENS, num_retries=0, **extra)
+
+
 def missing_key_variable(model_name: str):
     """Return the name of the key variable a model needs if it is not set, else None."""
     provider = model_name.split("/", 1)[0]
@@ -707,8 +718,8 @@ def main() -> int:
 
     import dspy
     # num_retries=0: a failed request is not sent again, so the call ceiling holds.
-    proposer_lm = dspy.LM(PROPOSER_MODEL, max_tokens=MAX_TOKENS, num_retries=0)
-    reflection_lm = dspy.LM(REFLECTION_MODEL, max_tokens=MAX_TOKENS, num_retries=0)
+    proposer_lm = make_lm(PROPOSER_MODEL)
+    reflection_lm = make_lm(REFLECTION_MODEL)
 
     # Read memory before anything is proposed.
     store = lesson_memory.open_memory()

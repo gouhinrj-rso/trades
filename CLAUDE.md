@@ -76,5 +76,10 @@ that already failed the same way.
   train but not on validation is saved as `flagged_overfitting` and never promoted.
 - The proposer's answer is data: candidates are validated against `FAMILY_SPECS` and nothing the model
   writes is executed.
-- As of 2026-11-13 the optimizer has only been run with a scripted stand-in model in tests. No real
-  optimization has been run and `prompts/` does not exist yet.
+- `TT_ANTHROPIC_API_BASE` (default `https://api.anthropic.com/v1`) is passed to DSPy explicitly. DSPy
+  appends only `/messages`, so an `ANTHROPIC_BASE_URL` without `/v1` gives HTTP 404 on every call.
+- First real run 2026-11-13 (20 trials, Sonnet 5.5 proposer, Opus 5.5 reflection): the baseline (v1)
+  stayed best (train 8, validation 10). The one rewrite (v2) scored train 14, validation 7 and was
+  flagged as overfitting: it had copied specific train-window parameter values into the prompt.
+- Known weakness: DSPy's response cache returns the same rewrite when the reflection input repeats, so
+  that run produced only one distinct new prompt from three rewrite steps.
