@@ -4,6 +4,6 @@ window.KILL_SWITCH = {
  "reason": "No state file yet: engaged by default until the owner releases it.",
  "changed_at": null,
  "changed_by": "fail-safe default",
- "published_at": "2026-11-13T02:13:06Z"
+ "published_at": "2026-11-13T02:23:40Z"
 };
 if (window.onKillSwitch) { window.onKillSwitch(window.KILL_SWITCH); }

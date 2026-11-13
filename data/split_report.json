@@ -1,36 +1,36 @@
 {
  "pair": "ETHUSD",
- "interval_minutes": 5,
+ "interval_minutes": 60,
  "source": "https://api.kraken.com/0/public/OHLC",
- "fetched_at": "2026-11-12T23:11:13Z",
+ "fetched_at": "2026-11-13T02:22:58Z",
  "rows_returned_by_kraken": 721,
  "duplicates_dropped": 0,
  "unfinished_bars_dropped": 1,
  "bar_count": 720,
- "first_timestamp": "2026-11-10T11:10:00Z",
- "last_timestamp": "2026-11-12T23:05:00Z",
+ "first_timestamp": "2026-10-14T02:00:00Z",
+ "last_timestamp": "2026-11-13T01:00:00Z",
  "gaps": [],
  "windows": [
   {
    "name": "train",
-   "file": "train_5m.json",
+   "file": "train_1h.json",
    "bars": 432,
-   "first_timestamp": "2026-11-10T11:10:00Z",
-   "last_timestamp": "2026-11-11T23:05:00Z"
+   "first_timestamp": "2026-10-14T02:00:00Z",
+   "last_timestamp": "2026-11-01T01:00:00Z"
   },
   {
    "name": "validation",
-   "file": "validation_5m.json",
+   "file": "validation_1h.json",
    "bars": 144,
-   "first_timestamp": "2026-11-11T23:10:00Z",
-   "last_timestamp": "2026-11-12T11:05:00Z"
+   "first_timestamp": "2026-11-01T02:00:00Z",
+   "last_timestamp": "2026-11-07T01:00:00Z"
   },
   {
    "name": "test (LOCKED)",
-   "file": "test_5m_LOCKED.json",
+   "file": "test_1h_LOCKED.json",
    "bars": 144,
-   "first_timestamp": "2026-11-12T11:10:00Z",
-   "last_timestamp": "2026-11-12T23:05:00Z"
+   "first_timestamp": "2026-11-07T02:00:00Z",
+   "last_timestamp": "2026-11-13T01:00:00Z"
   }
  ]
 }

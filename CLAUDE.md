@@ -42,13 +42,25 @@ It was copied from `gouhinrj-rso/claude` (`trading-terminal/`) on 2026-11-13.
 
 ## Data and the locked test window
 
-`fetch_data.py` saves Kraken ETH/USD 5-minute bars to `data/` and splits them by
-time: 60% train, 20% validation, 20% test.
+`fetch_data.py` saves Kraken ETH/USD **1-hour** bars to `data/` (720 bars, about 30 days: 2026-10-14 to
+2026-11-13) and splits them by time: 60% train, 20% validation, 20% test. File names carry the bar size
+(`train_1h.json`, `validation_1h.json`, `test_1h_LOCKED.json`, `bars_1h.json`).
 
-- **Do not open, read, print or load `data/test_5m_LOCKED.json` until the owner says "unlock test".**
-- `data/bars_5m.json` contains every bar, including the test bars. Treat it as locked too: strategy, backtest and optimizer code must read only `data/train_5m.json` and `data/validation_5m.json`.
+- **Do not open, read, print or load `data/test_1h_LOCKED.json` until the owner says "unlock test".**
+- `data/bars_1h.json` contains every bar, including the test bars. Treat it as locked too: strategy, backtest and optimizer code must read only `data/train_1h.json` and `data/validation_1h.json`.
 - `data/split_report.json` holds the range, counts, gaps and window boundaries (no prices). Read that when you need sizes or dates.
 - Do not run `python fetch_data.py --refresh` without the owner asking. It moves all three windows, so old test bars could become training bars.
+- `data/archive_5m/` holds the first data set (5-minute bars, 2026-11-10 to 2026-11-12) and its gate results.
+  Its test file was never opened and is still locked. Nothing reads this folder.
+- Strategy parameters are counted in bars, so the same candidate name means a different strategy on
+  1-hour bars than it did on 5-minute bars (`window=40` is 40 hours now, 200 minutes before).
+- **Stale since the switch to 1-hour bars (2026-11-13), pending an owner decision:** the 17 lessons in
+  `memory_store/`, prompts v1-v9 in `prompts/`, `data/rounds.json` and `data/optimizer_trials.jsonl` all
+  come from the 5-minute data. Do not run `run_round.py`, `run_rounds.py` or `optimizer.py` until the owner
+  says whether to reset or tag them: memory would wrongly skip candidates by name. The old 5-minute period
+  (Nov 10-12) also sits inside the new locked test window.
+- Result on 1-hour bars with unchanged thresholds: 1 of 18 grid candidates passes the gate
+  (`zscore(window=80, entry=1.5)`); on the 5-minute data 5 passed, and none of those 5 passes now.
 
 ## Memory of failed ideas
 

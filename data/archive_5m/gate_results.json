@@ -1,0 +1,230 @@
+{
+ "dataset": "Kraken ETHUSD 5-minute bars, 2026-11-10 to 2026-11-12",
+ "results": [
+  {
+   "name": "ema_cross(fast=5, slow=30)",
+   "family": "ema_crossover",
+   "verdict": "BLOCK",
+   "failures": [
+    "train return -0.41% <= 0",
+    "validation return -2.04% <= 0",
+    "validation max drawdown 2.08% > 1.5%"
+   ],
+   "train_return_pct": -0.4104,
+   "validation_return_pct": -2.0412,
+   "validation_drawdown_pct": 2.0825,
+   "validation_trades": 6
+  },
+  {
+   "name": "ema_cross(fast=5, slow=60)",
+   "family": "ema_crossover",
+   "verdict": "BLOCK",
+   "failures": [
+    "train return -2.36% <= 0",
+    "validation return -0.40% <= 0"
+   ],
+   "train_return_pct": -2.3615,
+   "validation_return_pct": -0.3977,
+   "validation_drawdown_pct": 0.3977,
+   "validation_trades": 2
+  },
+  {
+   "name": "ema_cross(fast=5, slow=120)",
+   "family": "ema_crossover",
+   "verdict": "BLOCK",
+   "failures": [
+    "train return -2.64% <= 0",
+    "validation return +0.00% <= 0",
+    "train/validation gap 2.64 pts > 2 pts (train -2.64%, validation +0.00%)",
+    "validation trade count 0 < 2"
+   ],
+   "train_return_pct": -2.6433,
+   "validation_return_pct": 0.0,
+   "validation_drawdown_pct": 0.0,
+   "validation_trades": 0
+  },
+  {
+   "name": "ema_cross(fast=10, slow=30)",
+   "family": "ema_crossover",
+   "verdict": "BLOCK",
+   "failures": [
+    "train return -0.86% <= 0",
+    "validation return -1.79% <= 0",
+    "validation max drawdown 1.79% > 1.5%"
+   ],
+   "train_return_pct": -0.8618,
+   "validation_return_pct": -1.7854,
+   "validation_drawdown_pct": 1.7854,
+   "validation_trades": 6
+  },
+  {
+   "name": "ema_cross(fast=10, slow=60)",
+   "family": "ema_crossover",
+   "verdict": "BLOCK",
+   "failures": [
+    "train return -1.34% <= 0",
+    "validation return +0.00% <= 0",
+    "validation trade count 0 < 2"
+   ],
+   "train_return_pct": -1.3437,
+   "validation_return_pct": 0.0,
+   "validation_drawdown_pct": 0.0,
+   "validation_trades": 0
+  },
+  {
+   "name": "ema_cross(fast=10, slow=120)",
+   "family": "ema_crossover",
+   "verdict": "BLOCK",
+   "failures": [
+    "train return -2.54% <= 0",
+    "validation return +0.00% <= 0",
+    "train/validation gap 2.54 pts > 2 pts (train -2.54%, validation +0.00%)",
+    "validation trade count 0 < 2"
+   ],
+   "train_return_pct": -2.5444,
+   "validation_return_pct": 0.0,
+   "validation_drawdown_pct": 0.0,
+   "validation_trades": 0
+  },
+  {
+   "name": "ema_cross(fast=20, slow=30)",
+   "family": "ema_crossover",
+   "verdict": "BLOCK",
+   "failures": [
+    "train return -0.95% <= 0",
+    "validation return -0.52% <= 0"
+   ],
+   "train_return_pct": -0.95,
+   "validation_return_pct": -0.5224,
+   "validation_drawdown_pct": 0.5578,
+   "validation_trades": 2
+  },
+  {
+   "name": "ema_cross(fast=20, slow=60)",
+   "family": "ema_crossover",
+   "verdict": "BLOCK",
+   "failures": [
+    "train return -1.00% <= 0",
+    "validation return +0.00% <= 0",
+    "validation trade count 0 < 2"
+   ],
+   "train_return_pct": -0.9992,
+   "validation_return_pct": 0.0,
+   "validation_drawdown_pct": 0.0,
+   "validation_trades": 0
+  },
+  {
+   "name": "ema_cross(fast=20, slow=120)",
+   "family": "ema_crossover",
+   "verdict": "BLOCK",
+   "failures": [
+    "train return -2.06% <= 0",
+    "validation return +0.00% <= 0",
+    "train/validation gap 2.06 pts > 2 pts (train -2.06%, validation +0.00%)",
+    "validation trade count 0 < 2"
+   ],
+   "train_return_pct": -2.0622,
+   "validation_return_pct": 0.0,
+   "validation_drawdown_pct": 0.0,
+   "validation_trades": 0
+  },
+  {
+   "name": "zscore(window=20, entry=1.0)",
+   "family": "zscore_reversion",
+   "verdict": "BLOCK",
+   "failures": [
+    "train return -0.53% <= 0"
+   ],
+   "train_return_pct": -0.527,
+   "validation_return_pct": 1.3632,
+   "validation_drawdown_pct": 0.5908,
+   "validation_trades": 8
+  },
+  {
+   "name": "zscore(window=20, entry=1.5)",
+   "family": "zscore_reversion",
+   "verdict": "PASS",
+   "failures": [],
+   "train_return_pct": 1.1481,
+   "validation_return_pct": 1.0215,
+   "validation_drawdown_pct": 0.5908,
+   "validation_trades": 5
+  },
+  {
+   "name": "zscore(window=20, entry=2.0)",
+   "family": "zscore_reversion",
+   "verdict": "PASS",
+   "failures": [],
+   "train_return_pct": 0.4002,
+   "validation_return_pct": 0.3904,
+   "validation_drawdown_pct": 0.5908,
+   "validation_trades": 3
+  },
+  {
+   "name": "zscore(window=40, entry=1.0)",
+   "family": "zscore_reversion",
+   "verdict": "PASS",
+   "failures": [],
+   "train_return_pct": 1.4448,
+   "validation_return_pct": 1.7525,
+   "validation_drawdown_pct": 0.5908,
+   "validation_trades": 7
+  },
+  {
+   "name": "zscore(window=40, entry=1.5)",
+   "family": "zscore_reversion",
+   "verdict": "PASS",
+   "failures": [],
+   "train_return_pct": 1.7255,
+   "validation_return_pct": 1.3736,
+   "validation_drawdown_pct": 0.5908,
+   "validation_trades": 4
+  },
+  {
+   "name": "zscore(window=40, entry=2.0)",
+   "family": "zscore_reversion",
+   "verdict": "PASS",
+   "failures": [],
+   "train_return_pct": 1.2637,
+   "validation_return_pct": 1.2744,
+   "validation_drawdown_pct": 0.5908,
+   "validation_trades": 3
+  },
+  {
+   "name": "zscore(window=80, entry=1.0)",
+   "family": "zscore_reversion",
+   "verdict": "BLOCK",
+   "failures": [
+    "train/validation gap 2.13 pts > 2 pts (train +2.39%, validation +0.26%)"
+   ],
+   "train_return_pct": 2.3867,
+   "validation_return_pct": 0.2571,
+   "validation_drawdown_pct": 1.0648,
+   "validation_trades": 3
+  },
+  {
+   "name": "zscore(window=80, entry=1.5)",
+   "family": "zscore_reversion",
+   "verdict": "BLOCK",
+   "failures": [
+    "train return -0.12% <= 0"
+   ],
+   "train_return_pct": -0.1151,
+   "validation_return_pct": 0.3841,
+   "validation_drawdown_pct": 1.0648,
+   "validation_trades": 2
+  },
+  {
+   "name": "zscore(window=80, entry=2.0)",
+   "family": "zscore_reversion",
+   "verdict": "BLOCK",
+   "failures": [
+    "validation trade count 1 < 2"
+   ],
+   "train_return_pct": 0.4661,
+   "validation_return_pct": 0.0992,
+   "validation_drawdown_pct": 1.0648,
+   "validation_trades": 1
+  }
+ ]
+}

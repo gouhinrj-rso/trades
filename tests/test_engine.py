@@ -109,6 +109,10 @@ def test_validation_run_starts_flat_and_only_trades_after_trade_start():
 
 def test_engine_refuses_locked_files(tmp_path):
     with pytest.raises(PermissionError):
+        engine.load_bars(tmp_path / "test_1h_LOCKED.json")
+    with pytest.raises(PermissionError):
+        engine.load_bars(tmp_path / "bars_1h.json")
+    with pytest.raises(PermissionError):
         engine.load_bars(tmp_path / "test_5m_LOCKED.json")
     with pytest.raises(PermissionError):
         engine.load_bars(tmp_path / "bars_5m.json")
