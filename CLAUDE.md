@@ -27,6 +27,7 @@ It was copied from `gouhinrj-rso/claude` (`trading-terminal/`) on 2026-11-13.
 | Build the page data | `python build_view.py` (writes `view/data.js`; then open `view/index.html`, no server) |
 | Paper replay | `python paper.py --candidate "<name>"` (gate-passed candidates only; simulated orders) |
 | Kill switch | `python kill_switch.py status` / `engage "reason"` / `release --confirm` |
+| Run three full rounds | `python run_rounds.py` (model proposes; each round ends with a 20-trial prompt optimization; needs an LLM key; up to 90 model calls) |
 | Show memory | `python memory.py` (prints every stored lesson) |
 | Fetch bars | `python fetch_data.py` (rerun prints the saved report; `--refresh` refetches and replaces every window) |
 
@@ -84,8 +85,11 @@ that already failed the same way.
 - First real run 2026-11-13 (20 trials, Sonnet 5.5 proposer, Opus 5.5 reflection): the baseline (v1)
   stayed best (train 8, validation 10). The one rewrite (v2) scored train 14, validation 7 and was
   flagged as overfitting: it had copied specific train-window parameter values into the prompt.
-- Known weakness: DSPy's response cache returns the same rewrite when the reflection input repeats, so
-  that run produced only one distinct new prompt from three rewrite steps.
+- The rewrite (reflection) model now runs with caching off, so each rewrite step is a fresh call.
+- Three-round run 2026-11-13 (`run_rounds.py`, rounds 3-5 in `data/rounds.json`): passed 6, 6, 8 of 8;
+  blocked 2, 2, 0; memory grew from 13 to 17 lessons. All seven rewritten prompts (v3-v9) were flagged as
+  overfitting and v1 stayed best. In rounds 4 and 5 v1 scored 14 of a possible 14 on validation, so the
+  metric is at its ceiling and no rewrite can be promoted until the metric or the data changes.
 
 ## Paper execution and the kill switch
 
