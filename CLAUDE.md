@@ -157,8 +157,11 @@ Python 3.12 (`.python-version`); every dependency in `requirements.txt` is pinne
   rejected, never repaired. A test keeps the prompt and the checker in step.
 - Nothing reads the events yet. When it does (PRD Prompt 7), it starts in shadow mode, and a missing or stale
   file may only ever mean "no veto", never a trade.
-- Open owner decisions: where the Bot commits (a separate data-only repository is recommended) and the
-  X-search cap per run.
+- The Bot's first test file (`research/events/2026-11-14.jsonl`, pushed by the owner) watches six futures roots
+  (CL, NG, GC, HG, ZC, ZW), now `scout_watchlist` in `config/paper.yaml`. Checker result: 10 valid, 1 rejected.
+  None of those tickers is in the ETF universe, so its vetoes cannot apply to baseline B1.
+- Open owner decisions: the full watchlist, where the Bot commits (a separate data-only repository is
+  recommended; it currently pushes to this repository) and the X-search cap per run.
 
 ## Memory of failed ideas
 

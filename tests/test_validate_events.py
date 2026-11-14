@@ -73,7 +73,9 @@ def test_valid_file_counts_events_and_vetoes(tmp_path):
 # ---- every way a line can be wrong --------------------------------------------------
 @pytest.mark.parametrize("changes, expected", [
     ({"ticker": "TSLA"}, "not on the watchlist"),
-    ({"event_type": "rumour"}, "event_type must be one of"),
+    ({"event_type": "Big Rumour!"}, "event_type must be a short lower_case_label"),
+    ({"veto_reason": 7}, "veto_reason must be text or null"),
+    ({"event_time_utc": "2026-11-16T09:00:00Z"}, "needs an event_time_utc after first_seen_utc"),
     ({"direction_hint": "sideways"}, "direction_hint must be one of"),
     ({"magnitude_hint": "huge"}, "magnitude_hint must be one of"),
     ({"confidence_evidence_quality": "certain"}, "confidence_evidence_quality must be one of"),
@@ -103,6 +105,11 @@ def test_valid_file_counts_events_and_vetoes(tmp_path):
 def test_bad_field_is_reported(changes, expected):
     found = problems(**changes)
     assert any(expected in problem for problem in found), found
+
+
+def test_bot_style_labels_and_a_null_veto_reason_are_accepted():
+    assert problems(event_type="inventory_report", veto_new_entry=False, veto_reason=None) == []
+    assert problems(veto_reason=None) != []                    # but a veto still needs its reason
 
 
 def test_unsourced_event_must_abstain():
@@ -158,8 +165,11 @@ def test_command_line_exit_codes(tmp_path, capsys):
     assert "line 1: not valid JSON" in capsys.readouterr().out
 
 
-def test_watchlist_comes_from_the_config_universe():
-    assert ve.load_watchlist() == ["SPY", "QQQ", "IWM", "EFA", "EEM", "TLT", "IEF", "GLD", "DBC", "VNQ"]
+def test_watchlist_comes_from_the_config(tmp_path):
+    assert ve.load_watchlist() == ["CL", "NG", "GC", "HG", "ZC", "ZW"]
+    config = tmp_path / "paper.yaml"
+    config.write_text("universe: [SPY, TLT]\n")                # no scout_watchlist -> the trading universe
+    assert ve.load_watchlist(config) == ["SPY", "TLT"]
 
 
 def test_prompt_file_lists_the_same_fields_and_choices_as_the_checker():

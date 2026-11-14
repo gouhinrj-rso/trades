@@ -33,18 +33,20 @@ PROJECT_DIR = Path(__file__).resolve().parents[2]
 CONFIG_FILE = PROJECT_DIR / "config" / "paper.yaml"
 
 # ---- the format: every key a line must have, and what each may contain ----------
-EVENT_TYPES = ("scheduled_release", "guidance_change", "supply_disruption", "regulatory_action", "halt", "other")
 CHOICES = {
-    "event_type": EVENT_TYPES,
     "is_surprise_vs_expectations": ("yes", "no", "unknown"),
     "direction_hint": ("up", "down", "unclear"),
     "magnitude_hint": ("low", "med", "high"),
     "confidence_evidence_quality": ("low", "med", "high"),
 }
 TRUE_OR_FALSE = ("scheduled", "veto_new_entry", "abstain")
-TEXT = ("event_id", "ticker", "headline", "already_priced_evidence", "veto_reason")
+TEXT = ("event_id", "ticker", "event_type", "headline", "already_priced_evidence")
 REQUIRED_KEYS = (list(TEXT) + list(CHOICES) + list(TRUE_OR_FALSE)
-                 + ["event_time_utc", "first_seen_utc", "primary_source_url", "corroborating_urls"])
+                 + ["veto_reason", "event_time_utc", "first_seen_utc", "primary_source_url", "corroborating_urls"])
+
+# event_type is the Bot's own short label (the PRD does not fix a list), for example
+# "inventory_report" or "trading_halt": lower-case words joined by underscores.
+EVENT_TYPE = re.compile(r"^[a-z][a-z0-9_]{1,39}$")
 
 FILE_NAME = re.compile(r"^(\d{4}-\d{2}-\d{2})\.jsonl$")
 EVENT_ID = re.compile(r"^\d{4}-\d{2}-\d{2}-[A-Z.]{1,6}-[a-z0-9-]{1,60}$")
@@ -54,9 +56,13 @@ CLOCK_SLACK = timedelta(minutes=10)
 
 
 def load_watchlist(config_file: Path = CONFIG_FILE) -> list:
-    """The tickers an event may name: the universe in config/paper.yaml."""
+    """The tickers an event may name.
+
+    `scout_watchlist` in config/paper.yaml if it is set, otherwise the trading universe.
+    """
     with open(config_file) as handle:
-        return list(yaml.safe_load(handle).get("universe") or [])
+        config = yaml.safe_load(handle)
+    return list(config.get("scout_watchlist") or config.get("universe") or [])
 
 
 def parse_utc(value) -> datetime | None:
@@ -99,6 +105,11 @@ def check_event(event, watchlist: list, now: datetime, file_date: str | None = N
         if not isinstance(event[key], bool):
             problems.append(f"{key} must be true or false, got {event[key]!r}")
 
+    if isinstance(event["event_type"], str) and not EVENT_TYPE.match(event["event_type"]):
+        problems.append("event_type must be a short lower_case_label, got " + repr(event["event_type"]))
+    # veto_reason is text when there is a veto; without one it may be empty or null.
+    if event["veto_reason"] is not None and not isinstance(event["veto_reason"], str):
+        problems.append("veto_reason must be text or null")
     if isinstance(event["event_id"], str) and not EVENT_ID.match(event["event_id"]):
         problems.append("event_id must look like 2026-11-16-SPY-short-slug")
     if event["ticker"] not in watchlist:
@@ -139,6 +150,11 @@ def check_event(event, watchlist: list, now: datetime, file_date: str | None = N
             problems.append("a veto needs a primary_source_url")
         if event["abstain"] is True:
             problems.append("an event cannot both veto and abstain")
+        # A scheduled event can only block new entries BEFORE it happens.
+        event_time = parse_utc(event["event_time_utc"])
+        if event["scheduled"] is True and event_time is not None and first_seen is not None \
+                and event_time <= first_seen:
+            problems.append("a veto for a scheduled event needs an event_time_utc after first_seen_utc")
     return problems
 
 
