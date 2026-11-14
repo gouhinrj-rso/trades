@@ -1,0 +1,33 @@
+# PAPER ACCOUNT SETTINGS
+#
+# This project is paper only. There is no other mode and no setting here can
+# create one: a hook blocks any edit that tries to switch real trading on.
+# Risk limits are NOT in this file; they live in config/risk_limits.yaml.
+
+mode: paper
+
+account:
+  starting_cash: 10000.0     # paper dollars (same as STARTING_CASH in paper.py)
+  base_currency: USD
+
+costs:
+  fee_bps_per_side: 2.0      # same as FEE_BPS_PER_SIDE in engine.py
+  slippage_bps: TBD          # owner decision - not set yet
+
+orders:
+  order_lifetime_bars: 1     # an unfilled limit order is cancelled after this many bars
+
+# What the current code trades (fetch_data.py, engine.py, paper.py).
+current_market:
+  venue: Kraken              # public market-data endpoints only
+  symbol: ETH/USD
+  bar_size: 1h
+
+# Universe for the daily-bar pipeline in src/data. TBD - owner decision.
+# An empty list means src/data downloads nothing.
+universe: []
+
+data:
+  source: TBD                # owner decision: alpaca_paper_data or yfinance (research only)
+  bar_size: 1d
+  cache_dir: data/cache

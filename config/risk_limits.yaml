@@ -1,0 +1,30 @@
+# RISK LIMITS - the owner's file.
+#
+# DO NOT EDIT without the owner's explicit approval in the conversation.
+# Claude Code is set to ask before any edit to this file (.claude/settings.json).
+#
+# Every number below is a copy of a value the owner already set in code
+# (gate.py thresholds; paper.py settings, 2026-11-13). Nothing here is new.
+# tests/test_config.py fails if this file and the code ever disagree.
+# The code does not read this file yet; gate.py and paper.py still hold the
+# working values. Moving them to read from here is an open question for the owner.
+
+gate:                                  # source: gate.py THRESHOLDS block
+  min_train_return_pct: 0.0            # train return must be ABOVE this
+  min_validation_return_pct: 0.0       # validation return must be ABOVE this
+  max_return_gap_pct_points: 2.0       # |train - validation| at most this
+  max_validation_drawdown_pct: 1.5     # validation max drawdown at most this
+  min_validation_trades: 2             # validation trade count at least this
+
+paper_broker:                          # source: paper.py PAPER TRADING SETTINGS block
+  stop_pct: 1.0                        # every entry carries a stop this far below its limit price
+  daily_loss_cap_pct: 2.0              # no new entries once down this much on the UTC day
+  allowed_order_types: [limit]         # limit orders only
+
+# Limits the owner has not set yet. TBD means "no value chosen"; code must
+# refuse to run a feature that needs one of these until it is filled in.
+position_sizing:
+  max_position_pct_of_equity: TBD
+  max_gross_exposure_pct: TBD
+  max_positions: TBD
+  max_order_notional: TBD
