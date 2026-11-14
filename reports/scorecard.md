@@ -9,6 +9,8 @@
 - Trials counted (rows in experiments/trials.csv): 14.
 - Run group: fac22b41. Rules: protocol.md. Definitions: reports/metrics_spec.md.
 
+> **Read `reports/audit.md` before relying on this page.** The audit found that some gates pass because of how they were defined. The verdicts below are as the protocol defined them.
+
 | Gate | Rule | Verdict | Evidence |
 |---|---|---|---|
 | 1. Deflated Sharpe | DSR > 0.95 | **PASS** | DSR = 0.990 with N = 14 trials (PSR against zero = 0.996; Sharpe to beat = 0.08 annualized) |
