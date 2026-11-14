@@ -27,6 +27,12 @@ current_market:
 # Long-only ETFs. Do not change it: the baseline is frozen.
 universe: [SPY, QQQ, IWM, EFA, EEM, TLT, IEF, GLD, DBC, VNQ]
 
+# What the Market Scout Grok Bot watches (research/grok/market_scout_prompt.md).
+# These six futures roots are the tickers in the Bot's first test file (2026-11-14).
+# OWNER TO CONFIRM the full list. Nothing trades these; the list only tells the
+# event-file checker which tickers to accept.
+scout_watchlist: [CL, NG, GC, HG, ZC, ZW]
+
 # Where idle money sits. The first one that passes its data-health checks is used.
 cash_vehicles: [SHV, BIL]
 
