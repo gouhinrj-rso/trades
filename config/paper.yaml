@@ -1,0 +1,48 @@
+# PAPER ACCOUNT SETTINGS
+#
+# This project is paper only. There is no other mode and no setting here can
+# create one: a hook blocks any edit that tries to switch real trading on.
+# Risk limits are NOT in this file; they live in config/risk_limits.yaml.
+
+mode: paper
+
+account:
+  starting_cash: 10000.0     # paper dollars (same as STARTING_CASH in paper.py)
+  base_currency: USD
+
+costs:
+  fee_bps_per_side: 2.0      # commission per side; same as FEE_BPS_PER_SIDE in engine.py
+  slippage_bps: 5.0          # per side, against the open (owner, 2026-11-14)
+
+orders:
+  order_lifetime_bars: 1     # an unfilled limit order is cancelled after this many bars
+
+# What the current code trades (fetch_data.py, engine.py, paper.py).
+current_market:
+  venue: Kraken              # public market-data endpoints only
+  symbol: ETH/USD
+  bar_size: 1h
+
+# Universe for the frozen baseline B1 (owner's list, 2026-11-14; see protocol.md).
+# Long-only ETFs. Do not change it: the baseline is frozen.
+universe: [SPY, QQQ, IWM, EFA, EEM, TLT, IEF, GLD, DBC, VNQ]
+
+# Where idle money sits. The first one that passes its data-health checks is used.
+cash_vehicles: [SHV, BIL]
+
+data:
+  source: yfinance             # RESEARCH ONLY. Needs no key.
+  calendar: NYSE               # exchange calendar used for gap checks and bar closing times
+  bar_size: 1d
+  start: "2003-01-01"          # warm-up history for the first signals in 2005
+  train_end: "2016-12-31"      # train = 2005-2016 (bars from 2003 are warm-up only)
+  validation_end: "2021-12-31" # validation = 2017-2021; everything later is the LOCKED holdout
+  cache_dir: data/cache        # git-ignored
+
+# Frozen baseline B1 (protocol.md section 1). Do not edit these values.
+baseline:
+  momentum_lookback_months: 12
+  momentum_skip_months: 1
+  trend_sma_days: 200
+  volatility_days: 60
+  trade_start: "2005-01-01"

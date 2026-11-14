@@ -1,0 +1,222 @@
+{
+  "generated_at": "2026-11-14T14:13:34.228128+00:00",
+  "source": "yfinance",
+  "calendar": "NYSE",
+  "requested": {
+    "first_session": "2003-01-02",
+    "last_session": "2026-11-13",
+    "sessions": 6006
+  },
+  "windows": {
+    "train": {
+      "first_session": "2003-01-02",
+      "last_session": "2016-12-30",
+      "sessions": 3525
+    },
+    "validation": {
+      "first_session": "2017-01-03",
+      "last_session": "2021-12-31",
+      "sessions": 1259
+    },
+    "holdout": {
+      "first_session": "2022-01-03",
+      "last_session": "2026-11-13",
+      "sessions": 1222
+    }
+  },
+  "symbols": [
+    {
+      "symbol": "SPY",
+      "status": "OK",
+      "cached": true,
+      "passed": true,
+      "rows": 6006,
+      "first_session": "2003-01-02",
+      "last_session": "2026-11-13",
+      "expected_sessions": 6006,
+      "issues": [],
+      "starts_late": false,
+      "adjustment": "split_adjusted",
+      "dividend_days": 96,
+      "split_days": 0
+    },
+    {
+      "symbol": "QQQ",
+      "status": "OK",
+      "cached": true,
+      "passed": true,
+      "rows": 6006,
+      "first_session": "2003-01-02",
+      "last_session": "2026-11-13",
+      "expected_sessions": 6006,
+      "issues": [],
+      "starts_late": false,
+      "adjustment": "split_adjusted",
+      "dividend_days": 90,
+      "split_days": 0
+    },
+    {
+      "symbol": "IWM",
+      "status": "OK",
+      "cached": true,
+      "passed": true,
+      "rows": 6006,
+      "first_session": "2003-01-02",
+      "last_session": "2026-11-13",
+      "expected_sessions": 6006,
+      "issues": [],
+      "starts_late": false,
+      "adjustment": "split_adjusted",
+      "dividend_days": 96,
+      "split_days": 1
+    },
+    {
+      "symbol": "EFA",
+      "status": "OK",
+      "cached": true,
+      "passed": true,
+      "rows": 6006,
+      "first_session": "2003-01-02",
+      "last_session": "2026-11-13",
+      "expected_sessions": 6006,
+      "issues": [],
+      "starts_late": false,
+      "adjustment": "split_adjusted",
+      "dividend_days": 44,
+      "split_days": 1
+    },
+    {
+      "symbol": "EEM",
+      "status": "OK",
+      "cached": true,
+      "passed": true,
+      "rows": 5936,
+      "first_session": "2003-04-14",
+      "last_session": "2026-11-13",
+      "expected_sessions": 5936,
+      "issues": [],
+      "starts_late": true,
+      "adjustment": "split_adjusted",
+      "dividend_days": 47,
+      "split_days": 2
+    },
+    {
+      "symbol": "TLT",
+      "status": "OK",
+      "cached": true,
+      "passed": true,
+      "rows": 6006,
+      "first_session": "2003-01-02",
+      "last_session": "2026-11-13",
+      "expected_sessions": 6006,
+      "issues": [],
+      "starts_late": false,
+      "adjustment": "split_adjusted",
+      "dividend_days": 285,
+      "split_days": 0
+    },
+    {
+      "symbol": "IEF",
+      "status": "OK",
+      "cached": true,
+      "passed": true,
+      "rows": 6006,
+      "first_session": "2003-01-02",
+      "last_session": "2026-11-13",
+      "expected_sessions": 6006,
+      "issues": [],
+      "starts_late": false,
+      "adjustment": "split_adjusted",
+      "dividend_days": 287,
+      "split_days": 0
+    },
+    {
+      "symbol": "GLD",
+      "status": "OK",
+      "cached": true,
+      "passed": true,
+      "rows": 5532,
+      "first_session": "2004-11-18",
+      "last_session": "2026-11-13",
+      "expected_sessions": 5532,
+      "issues": [],
+      "starts_late": true,
+      "adjustment": "split_adjusted",
+      "dividend_days": 0,
+      "split_days": 0
+    },
+    {
+      "symbol": "DBC",
+      "status": "OK",
+      "cached": true,
+      "passed": true,
+      "rows": 5227,
+      "first_session": "2006-02-06",
+      "last_session": "2026-11-13",
+      "expected_sessions": 5227,
+      "issues": [],
+      "starts_late": true,
+      "adjustment": "split_adjusted",
+      "dividend_days": 9,
+      "split_days": 0
+    },
+    {
+      "symbol": "VNQ",
+      "status": "OK",
+      "cached": true,
+      "passed": true,
+      "rows": 5568,
+      "first_session": "2004-09-29",
+      "last_session": "2026-11-13",
+      "expected_sessions": 5568,
+      "issues": [],
+      "starts_late": true,
+      "adjustment": "split_adjusted",
+      "dividend_days": 88,
+      "split_days": 0
+    },
+    {
+      "symbol": "SHV",
+      "status": "OK",
+      "cached": true,
+      "passed": true,
+      "rows": 4993,
+      "first_session": "2007-01-11",
+      "last_session": "2026-11-13",
+      "expected_sessions": 4993,
+      "issues": [],
+      "starts_late": true,
+      "adjustment": "split_adjusted",
+      "dividend_days": 185,
+      "split_days": 0
+    },
+    {
+      "symbol": "BIL",
+      "status": "BLOCKED",
+      "cached": false,
+      "passed": false,
+      "rows": 4898,
+      "first_session": "2007-05-30",
+      "last_session": "2026-11-13",
+      "expected_sessions": 4898,
+      "issues": [
+        {
+          "check": "stale_repeat",
+          "count": 1,
+          "examples": [
+            "2014-07-28"
+          ],
+          "detail": "identical to the previous bar"
+        }
+      ],
+      "starts_late": true,
+      "adjustment": "split_adjusted",
+      "dividend_days": 129,
+      "split_days": 1
+    }
+  ],
+  "blocked": [
+    "BIL"
+  ],
+  "passed": false
+}

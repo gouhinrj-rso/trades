@@ -1,14 +1,24 @@
+# Python 3.12 (see .python-version). Every version is pinned.
+# Versions resolved with pip for Python 3.12 on 2026-11-14.
+# No broker SDK is listed here on purpose: this project is paper only.
+
 # Runtime dependencies
-streamlit
-plotly
-pandas
+streamlit==1.67.0
+plotly==7.1.0
+pandas==3.1.1
+PyYAML==6.0.3
+
+# Daily-bar data pipeline (src/data). yfinance is a market-data library, research only.
+yfinance==1.8.0
+pandas_market_calendars==5.6.1
+pyarrow==26.0.1
 
 # Memory of failed ideas (runs locally, no API key)
-mem0ai
-fastembed
+mem0ai==2.2.1
+fastembed==0.9.1
 
 # Prompt optimization (needs an LLM key in the environment to run)
-dspy
+dspy==3.5.0
 
 # Development / testing
-pytest
+pytest==9.2.0

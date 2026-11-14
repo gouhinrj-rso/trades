@@ -1,0 +1,31 @@
+{
+  "permissions": {
+    "deny": [
+      "Read(.env)",
+      "Read(.env.*)",
+      "Edit(.env)",
+      "Edit(.env.*)",
+      "WebFetch(domain:api.alpaca.markets)",
+      "WebFetch(domain:api.ibkr.com)",
+      "Bash(python kill_switch.py release *)",
+      "Bash(python3 kill_switch.py release *)"
+    ],
+    "ask": [
+      "Edit(config/risk_limits.yaml)"
+    ]
+  },
+  "hooks": {
+    "PreToolUse": [
+      {
+        "matcher": "Bash|Edit|Write|MultiEdit|NotebookEdit",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "python3 \"${CLAUDE_PROJECT_DIR}/.claude/hooks/block_live.py\"",
+            "timeout": 30
+          }
+        ]
+      }
+    ]
+  }
+}

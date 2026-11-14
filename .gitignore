@@ -1,9 +1,40 @@
+# Python
 __pycache__/
 *.pyc
 .venv/
+venv/
 .pytest_cache/
+
+# Secrets and keys - never commit these
 .env
+.env.*
+!.env.example
 .streamlit/secrets.toml
+*.pem
+*.key
+*.p12
+*.pfx
+*.crt
+id_rsa*
+id_ed25519*
+secrets/
+credentials*.json
+*_credentials.json
+*.keystore
+
+# Data caches (downloaded bars can always be fetched again)
+data/cache/
+data/raw/
+*.parquet
+*.feather
+*.h5
+*.hdf5
+.cache/
+
+# Local tool settings
+.claude/settings.local.json
+
+# Reference clones and downloaded models
 repos/
 models/
 memory_store/qdrant/.lock

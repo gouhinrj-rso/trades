@@ -13,11 +13,35 @@ do not edit or commit it.
 This repository is the trading terminal; the project files sit at the repo root.
 It was copied from `gouhinrj-rso/claude` (`trading-terminal/`) on 2026-11-13.
 
+## Non-negotiable rules
+
+These come from the owner (2026-11-14). They override anything else in this file.
+
+1. **Paper only.** No real orders, no real-money broker or exchange endpoints, no real-money keys,
+   and no config switch that turns real trading on. `.claude/hooks/block_live.py` blocks these
+   in every Bash, Edit and Write call. If the hook blocks something, stop and tell the owner;
+   never reword a call to get past it.
+2. **No LLM in the order path.** Nothing between a signal and an order may call a model, build a
+   prompt or act on model output. Models may propose candidates for research; their answers are
+   validated data and are never executed.
+3. **Never edit `config/risk_limits.yaml` without the owner's explicit approval** in the
+   conversation. The same goes for the owner blocks at the top of `gate.py` and `paper.py`, which
+   that file mirrors. Never loosen a limit to get more passes.
+4. **Every backtest variant is logged to `experiments/trials.csv`, failures included.** One row
+   per variant, appended, never edited or deleted. A result that was not logged does not count.
+5. **Never tune on the holdout window.** The holdout is `data/test_1h_LOCKED.json` (see "Data and
+   the locked test window"). Do not open it, and do not choose, adjust or compare anything using it.
+
 ## Commands
+
+Python 3.12 (`.python-version`); every dependency in `requirements.txt` is pinned.
 
 | What | Command (run from the repo root) |
 |---|---|
+| Set up | `python3.12 -m venv .venv && .venv/bin/pip install -r requirements.txt` |
+| Hook tests only | `python -m pytest tests/test_block_live.py -v` |
 | Install | `pip install -r requirements.txt` |
+| Daily bars | `python -m src.data.pipeline` (fetch, health-check, split and cache the universe in `config/paper.yaml`; a rerun prints the saved report; `--refresh` refetches and moves the holdout, owner only) |
 | Run | `streamlit run app.py` |
 | Test | `python -m pytest` |
 | Backtest | `python engine.py` (all candidates on train and validation; fees 2 bps per side; never reads the test window) |
@@ -30,6 +54,22 @@ It was copied from `gouhinrj-rso/claude` (`trading-terminal/`) on 2026-11-13.
 | Run three full rounds | `python run_rounds.py` (model proposes; each round ends with a 20-trial prompt optimization; needs an LLM key; up to 90 model calls) |
 | Show memory | `python memory.py` (prints every stored lesson) |
 | Fetch bars | `python fetch_data.py` (rerun prints the saved report; `--refresh` refetches and replaces every window) |
+
+## Layout and guardrails (added 2026-11-14)
+
+- `src/{data,strategy,risk,execution,accounting,reporting,research}/` is where new code goes. The
+  older modules (`engine.py`, `gate.py`, `paper.py`, `kill_switch.py`, `memory.py`, `optimizer.py`,
+  `terminal/`) still sit at the repo root and have not been moved.
+- `config/paper.yaml` holds paper account settings. `config/risk_limits.yaml` is the owner's limits
+  file; today it is a checked copy of the numbers in `gate.py` and `paper.py` (`tests/test_config.py`
+  fails if they differ), and limits the owner has not set are written as `TBD`.
+- `experiments/trials.csv` is the trial log (header only so far). `reports/` holds generated reports.
+- `.claude/settings.json` denies reading `.env*`, denies fetching real-money broker hosts, asks before
+  any edit to `config/risk_limits.yaml`, and runs `.claude/hooks/block_live.py` before every Bash,
+  Edit, Write, MultiEdit and NotebookEdit call. The hook's patterns are regular expressions so the
+  file never contains the strings it blocks; keep tests and docs free of those literal strings too.
+- Subagents in `.claude/agents/`: `quant-auditor` (read-only; Bash limited to pytest by
+  `.claude/hooks/tests_only_bash.py`), `data-engineer`, `risk-officer` (read-only).
 
 ## Conventions
 
@@ -68,6 +108,26 @@ It was copied from `gouhinrj-rso/claude` (`trading-terminal/`) on 2026-11-13.
   `zscore(window=90, entry=1.5)`, all neighbours judged on the same six-day validation window.
 - Result on 1-hour bars with unchanged thresholds: 1 of 18 grid candidates passes the gate
   (`zscore(window=80, entry=1.5)`); on the 5-minute data 5 passed, and none of those 5 passes now.
+
+## Daily bars (`src/data`) and the ledger (`src/accounting`), added 2026-11-14
+
+- `python -m src.data.pipeline` downloads daily bars for the universe in `config/paper.yaml` (SPY, QQQ, IWM,
+  TLT, GLD: the owner said "you choose") from yfinance, which is research only. Ten years, NYSE calendar.
+- Every row carries `source`, `fetched_at`, `available_at` (the session's closing time, UTC) and `adjustment`.
+  yfinance prices are split adjusted, not dividend adjusted; `adj_close` is both. Never mix flags in one series.
+- A symbol that fails any health check, or whose source fails, is not cached at all. Nothing is filled,
+  interpolated or made up. The report is `reports/data_health.md` and `.json` (dates and counts, no prices).
+- First fetch 2026-11-14: 2016-11-14 to 2026-11-13, 2514 sessions, all five symbols passed every check.
+  Train 2016-11-14 to 2022-11-09 (1508), validation 2022-11-10 to 2024-11-11 (503),
+  **holdout 2024-11-12 to 2026-11-13 (503), locked**.
+- The cache is `data/cache/daily/<SYMBOL>/{train,validation,holdout_LOCKED}.parquet`, git-ignored.
+  **Never open `holdout_LOCKED.parquet`.** `pipeline.load_bars` loads only train and validation; do not add
+  a way to load the holdout. Do not run `--refresh` without the owner asking: it moves all three windows.
+- Lookahead rules, enforced by `src/data/lookahead.py`: a signal at bar t uses bars up to t only, and its
+  order fills at the open of bar t+1. New strategy code must go through `run_signals` and `next_open_fills`
+  and have an `assert_no_lookahead` test.
+- The ledger (`src/accounting`) records cash, positions, fills, fees, slippage and cash-flow-adjusted
+  equity. Futures rolls happen only through an explicit `roll(...)` call.
 
 ## Memory of failed ideas
 
