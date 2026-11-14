@@ -1,0 +1,8 @@
+A6 risk-free rate missing on 0 of 4280 run days (those days were counted as 0)
+B2 validation Sharpe: strategy at 2x costs 1.072 vs 60/40 at 1x costs 1.092 -> gate 6 would FAIL
+A5 expectancy, all 204 months resampled in blocks of 3: +1.396R, 95% interval +0.586 to +2.228 (reported: +0.616 to +2.232 over 77 months with exits)
+B6 as reported (SPY + momentum): alpha +2.07% a year, t = 1.89; betas spy_excess 0.16, momentum_factor 0.15; R2 0.32
+B6 with IEF added: alpha +0.78% a year, t = 0.73; betas spy_excess 0.20, momentum_factor 0.14, ief_excess 0.27; R2 0.39
+B3 PSR against 60/40's per-day Sharpe (0.0451): 0.395
+B3 DSR with N = 19 rows, protocol spread (9 neighbour cells): 0.989 (Sharpe to beat 0.09 annual)
+B3 DSR with N = 19 rows, sampling error of one Sharpe: 0.781 (Sharpe to beat 0.46 annual)

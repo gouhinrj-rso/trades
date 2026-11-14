@@ -41,6 +41,7 @@ Python 3.12 (`.python-version`); every dependency in `requirements.txt` is pinne
 | Set up | `python3.12 -m venv .venv && .venv/bin/pip install -r requirements.txt` |
 | Hook tests only | `python -m pytest tests/test_block_live.py -v` |
 | Install | `pip install -r requirements.txt` |
+| Baseline B1 | `python -m src.research.run_baseline` then `python -m src.reporting.scorecard` (adds 14 trial rows per run; never add `--unlock-holdout`) |
 | Daily bars | `python -m src.data.pipeline` (fetch, health-check, split and cache the universe in `config/paper.yaml`; a rerun prints the saved report; `--refresh` refetches and moves the holdout, owner only) |
 | Run | `streamlit run app.py` |
 | Test | `python -m pytest` |
@@ -111,23 +112,40 @@ Python 3.12 (`.python-version`); every dependency in `requirements.txt` is pinne
 
 ## Daily bars (`src/data`) and the ledger (`src/accounting`), added 2026-11-14
 
-- `python -m src.data.pipeline` downloads daily bars for the universe in `config/paper.yaml` (SPY, QQQ, IWM,
-  TLT, GLD: the owner said "you choose") from yfinance, which is research only. Ten years, NYSE calendar.
+- `python -m src.data.pipeline` downloads daily bars for the universe and cash vehicles in `config/paper.yaml`
+  (the owner's ten ETFs plus SHV and BIL) from yfinance, which is research only. From 2003, NYSE calendar.
 - Every row carries `source`, `fetched_at`, `available_at` (the session's closing time, UTC) and `adjustment`.
   yfinance prices are split adjusted, not dividend adjusted; `adj_close` is both. Never mix flags in one series.
 - A symbol that fails any health check, or whose source fails, is not cached at all. Nothing is filled,
   interpolated or made up. The report is `reports/data_health.md` and `.json` (dates and counts, no prices).
-- First fetch 2026-11-14: 2016-11-14 to 2026-11-13, 2514 sessions, all five symbols passed every check.
-  Train 2016-11-14 to 2022-11-09 (1508), validation 2022-11-10 to 2024-11-11 (503),
-  **holdout 2024-11-12 to 2026-11-13 (503), locked**.
+- Current fetch (2026-11-14, at the owner's new windows): 2003-01-02 to 2026-11-13. All ten ETFs and SHV passed;
+  BIL is blocked (one repeated bar on 2014-07-28) and unused. Train to 2016-12-30, validation 2017-01-03 to
+  2021-12-31, **holdout 2022-01-03 onward, locked**.
 - The cache is `data/cache/daily/<SYMBOL>/{train,validation,holdout_LOCKED}.parquet`, git-ignored.
-  **Never open `holdout_LOCKED.parquet`.** `pipeline.load_bars` loads only train and validation; do not add
-  a way to load the holdout. Do not run `--refresh` without the owner asking: it moves all three windows.
+  **Never open `holdout_LOCKED.parquet`.** `pipeline.load_bars` gives the holdout only to a logged unlock. Do not run `--refresh` without the owner asking: it moves all three windows.
 - Lookahead rules, enforced by `src/data/lookahead.py`: a signal at bar t uses bars up to t only, and its
   order fills at the open of bar t+1. New strategy code must go through `run_signals` and `next_open_fills`
   and have an `assert_no_lookahead` test.
 - The ledger (`src/accounting`) records cash, positions, fills, fees, slippage and cash-flow-adjusted
   equity. Futures rolls happen only through an explicit `roll(...)` call.
+
+## Frozen baseline B1 (ETF trend + 12-1 momentum), added 2026-11-14
+
+- Rules are in `protocol.md`, committed before any code or result. **B1 is frozen: never change its
+  parameters, universe, costs, windows or gate thresholds.** A change needs a new protocol version from the owner.
+- Run: `python -m src.research.run_baseline` (14 engine runs, each appended to `experiments/trials.csv`), then
+  `python -m src.reporting.scorecard`. **Every run on real data adds trial rows, including reruns and any
+  ad-hoc script.** Do not rerun casually; develop and test on fixture data only.
+- Windows: train 2005-2016, validation 2017-2021, **holdout 2022 onward LOCKED**. The holdout opens only through
+  `--unlock-holdout --who ... --reason ...`, which logs to `experiments/holdout_access.csv`. Never pass that flag,
+  never call `src.data.holdout.unlock`, and never read `holdout_LOCKED.parquet` or post-2021 rows of the factor cache.
+- First run (group `fac22b41`): scorecard PASS on all six gates as defined. **`reports/audit.md` reads it as FAIL**:
+  gates 1, 5 and 6 pass only because of their definitions; the strategy trails 60/40 on Sharpe in train (0.50 vs
+  0.56) and overall (0.65 vs 0.72). Do not describe B1 as passing without the audit.
+- Trial log: 19 rows (14 from the run, 4 logged late for unlogged re-check runs, 1 audit follow-up).
+- Metric definitions: `reports/metrics_spec.md`. Gate thresholds are the owner's, at the top of
+  `src/reporting/scorecard.py`.
+- The `quant-auditor` agent type is only available in sessions started after `.claude/agents/` existed.
 
 ## Memory of failed ideas
 

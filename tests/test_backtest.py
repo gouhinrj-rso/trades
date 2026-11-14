@@ -113,14 +113,17 @@ def test_weights_are_inverse_volatility_slots_and_off_slots_go_to_cash():
     assert sum(weights.values()) < 1.0
 
 
-def test_signal_does_not_change_when_later_bars_change():
-    """Lookahead guard at the signal: bars after the signal day cannot matter."""
+def test_one_more_bar_changes_the_signal_inputs():
+    """The signal reads its newest bar: adding one more day must move the trend average and volatility.
+
+    (If the code lagged by a bar, dropping the last row would change nothing.)
+    """
     history = fixture_bars(13)
-    cut = 600
-    before = asset_state(history.iloc[:cut], Params())
-    tampered = history.copy()
-    tampered.loc[tampered.index[cut:], ["close", "tr_close"]] *= 5.0
-    assert asset_state(tampered.iloc[:cut], Params()) == before
+    full, shorter = asset_state(history.iloc[:600], Params()), asset_state(history.iloc[:599], Params())
+    assert full["volatility"] != shorter["volatility"]
+    last_sixty = history["tr_close"].iloc[:600].pct_change().iloc[-60:]
+    assert full["volatility"] == pytest.approx(last_sixty.std(ddof=1))
+    assert last_sixty.index[-1] == 599                      # the newest return ends on the signal day itself
 
 
 # ============================================================================
@@ -157,6 +160,16 @@ def test_changing_the_future_does_not_change_the_past(market):
     pd.testing.assert_series_equal(honest.daily.loc[:cutoff, "equity"], changed.daily.loc[:cutoff, "equity"])
     past = lambda fills: fills[fills["fill_session"] <= cutoff].reset_index(drop=True)
     pd.testing.assert_frame_equal(past(honest.fills), past(changed.fills))
+    # One-bar check: the first fills after the tampering point (2021-01-04) come from the signal at
+    # the close of 2020-12-31. Their SIZE must be untouched (sized from the untampered close);
+    # only their PRICE may differ (they fill at the tampered open).
+    first = pd.Timestamp("2021-01-04")
+    on_day = lambda fills: fills[fills["fill_session"] == first].reset_index(drop=True)
+    assert len(on_day(honest.fills)) > 0
+    pd.testing.assert_series_equal(on_day(honest.fills)["target_weight"], on_day(changed.fills)["target_weight"])
+    sells = lambda fills: on_day(fills)[on_day(fills)["side"] == "sell"].reset_index(drop=True)
+    pd.testing.assert_series_equal(sells(honest.fills)["quantity"], sells(changed.fills)["quantity"])
+    assert not np.allclose(on_day(honest.fills)["fill_price"], on_day(changed.fills)["fill_price"])
     # And the tampering really did change something later, so the test is not vacuous.
     assert not np.isclose(honest.daily["equity"].iloc[-1], changed.daily["equity"].iloc[-1])
 

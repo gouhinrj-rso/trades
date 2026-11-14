@@ -168,6 +168,9 @@ def render_scorecard(numbers: dict) -> str:
             lines.append(f"- Cash vehicle not used (data blocked): {', '.join(other)}. Using {numbers['cash_vehicle']}.")
     if numbers.get("failed_runs"):
         lines.append(f"- **Failed runs**: {', '.join(numbers['failed_runs'])}.")
+    if (PROJECT_DIR / "reports" / "audit.md").exists():
+        lines += ["", "> **Read `reports/audit.md` before relying on this page.** The audit found that some gates "
+                  "pass because of how they were defined. The verdicts below are as the protocol defined them."]
     lines += ["", "| Gate | Rule | Verdict | Evidence |", "|---|---|---|---|"]
     for gate in gates:
         lines.append(f"| {gate['gate']} | {gate['rule']} | **{gate['verdict']}** | {gate['evidence']} |")
