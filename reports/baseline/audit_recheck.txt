@@ -1,0 +1,46 @@
+A1 weights: 204 signal days, max |engine - independent| = 1.18e-14
+A2 equity: independent final 23039.45 vs engine 23039.45; max rel diff over 4280 days = 2.00e-15
+B fills: 1445 fills; all on the session after the signal: True; all on the first session of a month: True; reference price equals that day's open: True; every fill worse than the open: True
+C Sharpe recomputed from equity_curve.csv: {'train': np.float64(0.495), 'validation': np.float64(1.111), 'both': np.float64(0.65)}
+D1 cash vehicle first bar 2007-01-11; mean idle-cash share of equity before 2007-03: 28.5%, after: 0.01%
+D1 with idle cash earning RF until the cash vehicle exists: Sharpe {'train': np.float64(0.53), 'validation': np.float64(1.111), 'both': np.float64(0.676)} CAGR {'train': np.float64(0.0444), 'validation': np.float64(0.0705), 'both': np.float64(0.052)}
+D2 train: Sharpe strategy 0.50, 60/40 0.56, SPY 0.40; difference vs 60/40 = -0.07, 95% interval -0.60 to +0.45, share of resamples where strategy is ahead 40%
+D2 validation: Sharpe strategy 1.11, 60/40 1.09, SPY 0.93; difference vs 60/40 = +0.02, 95% interval -0.81 to +0.69, share of resamples where strategy is ahead 48%
+D2 both: Sharpe strategy 0.65, 60/40 0.72, SPY 0.55; difference vs 60/40 = -0.07, 95% interval -0.49 to +0.38, share of resamples where strategy is ahead 37%
+D3 per-day Sharpe 0.0410 (annual 0.65), skew -0.39, kurt 7.6, rows in trials.csv 14
+   spread of 9 neighbour cells (as reported): sd 0.047 annual, N=14: Sharpe to beat 0.08, DSR 0.990
+   spread of 9 neighbour cells (as reported): sd 0.047 annual, N=50: Sharpe to beat 0.11, DSR 0.987
+   spread of 9 neighbour cells (as reported): sd 0.047 annual, N=100: Sharpe to beat 0.12, DSR 0.985
+   spread of all 14 rows: sd 0.055 annual, N=14: Sharpe to beat 0.10, DSR 0.988
+   spread of all 14 rows: sd 0.055 annual, N=50: Sharpe to beat 0.13, DSR 0.984
+   spread of all 14 rows: sd 0.055 annual, N=100: Sharpe to beat 0.14, DSR 0.981
+   sampling error of one Sharpe (independent-trials assumption): sd 0.245 annual, N=14: Sharpe to beat 0.43, DSR 0.820
+   sampling error of one Sharpe (independent-trials assumption): sd 0.245 annual, N=50: Sharpe to beat 0.56, DSR 0.647
+   sampling error of one Sharpe (independent-trials assumption): sd 0.245 annual, N=100: Sharpe to beat 0.62, DSR 0.549
+D4 closed trades 132; holding period in trading days: median 105, mean 171, max 881; open at end: 4
+   protocol R (1-month sigma): expectancy +1.396R, 95% interval +0.616 to +2.232 (n=132)
+   R matched to each trade's holding period: expectancy +0.087R, 95% interval -0.127 to +0.299 (n=132)
+   protocol R, 5 best trades removed: expectancy +0.998R, 95% interval +0.264 to +1.755 (n=127)
+   protocol R, best 10% of trades removed: expectancy +0.371R, 95% interval -0.074 to +0.842 (n=119)
+   median R +0.04; share of trades with pnl>0 51.5%; dollar pnl: mean 73, median 3
+E calendar years:
+          strategy  60/40   SPY
+session                       
+2005          3.2    3.7   4.2
+2006         10.7   10.4  15.8
+2007         12.5    7.5   5.1
+2008          4.1  -17.9 -36.8
+2009          0.0   12.7  26.4
+2010          6.0   13.6  15.1
+2011          1.7    7.6   1.9
+2012          3.2   11.2  16.0
+2013          7.6   15.6  32.3
+2014          3.7   11.8  13.5
+2015         -1.8    1.7   1.2
+2016          0.7    7.7  12.0
+2017         10.6   13.7  21.7
+2018          1.5   -2.0  -4.6
+2019          8.7   21.9  31.2
+2020          5.1   16.2  18.3
+2021          9.6   15.1  28.7
+   years strategy beat 60/40: 4 of 17 ; years with a loss: 1
