@@ -9,7 +9,7 @@ import numpy as np
 import pandas as pd
 import pytest
 
-from src.data import adjust, lookahead, pipeline, validate
+from src.data import adjust, holdout, lookahead, pipeline, validate
 from src.data import sessions as cal
 from src.data.schema import SchemaError
 from src.data.sources import SourceError, normalize
@@ -338,8 +338,9 @@ def test_visible_bars_respects_available_at():
 # ============================================================================
 # Pipeline: blocking, no fabricated data, locked holdout
 # ============================================================================
-SETTINGS = {"universe": ["GOOD", "GAPPY", "DOWN"], "source": "yfinance", "calendar": CALENDAR,
-            "history_years": 1, "cache_dir": "unused"}
+SETTINGS = {"universe": ["GOOD", "GAPPY", "DOWN", "YOUNG"], "source": "yfinance", "calendar": CALENDAR,
+            "start": "2023-03-28", "train_end": "2023-10-31", "validation_end": "2024-01-31",
+            "cache_dir": "unused"}
 NOW = pd.Timestamp("2024-03-28 22:00", tz="UTC")                                  # after that day's close
 
 
@@ -355,6 +356,8 @@ class FakeSource:
                                      "volume", "dividend", "split_ratio"]]
         if symbol == "GAPPY":
             raw = raw.drop(raw.index[30])
+        if symbol == "YOUNG":
+            raw = raw[raw["session"] >= "2023-06-01"]         # a fund listed after the requested start
         return raw
 
 
@@ -371,12 +374,13 @@ def test_good_symbol_is_cached_in_three_windows(pipeline_run):
     assert entry["status"] == "OK" and entry["cached"]
     train = pipeline.load_bars("GOOD", "train", cache_dir=tmp_path / "cache")
     validation = pipeline.load_bars("GOOD", "validation", cache_dir=tmp_path / "cache")
-    total = report["requested"]["sessions"]
-    assert len(train) == int(total * 0.6)
-    assert len(train) + len(validation) == int(total * 0.8)
-    # Windows do not overlap and are in time order.
-    assert train["session"].max() < validation["session"].min()
-    assert str(validation["session"].max().date()) < report["windows"]["holdout"]["first_session"]
+    # Windows are cut by date, do not overlap and are in time order.
+    assert str(train["session"].min().date()) == "2023-03-28"
+    assert str(train["session"].max().date()) == "2023-10-31"
+    assert str(validation["session"].min().date()) == "2023-11-01"
+    assert str(validation["session"].max().date()) == "2024-01-31"
+    assert report["windows"]["holdout"]["first_session"] == "2024-02-01"
+    assert len(train) == report["windows"]["train"]["sessions"]
     # The cached file carries the point-in-time columns.
     for column in ["source", "fetched_at", "available_at", "adjustment"]:
         assert column in train.columns and train[column].notna().all()
@@ -410,12 +414,54 @@ def test_run_is_marked_failed_and_report_is_written(pipeline_run):
     assert (tmp_path / "reports" / "data_health.json").exists()
 
 
-def test_holdout_cannot_be_loaded(pipeline_run):
+def test_holdout_cannot_be_loaded_without_a_logged_unlock(pipeline_run):
     _, tmp_path = pipeline_run
     assert (tmp_path / "cache" / "daily" / "GOOD" / "holdout_LOCKED.parquet").exists()
     for window in ["holdout", "holdout_LOCKED", "test", "all"]:
         with pytest.raises(pipeline.DataBlocked):
             pipeline.load_bars("GOOD", window, cache_dir=tmp_path / "cache")
+    # Passing something that merely looks like permission does not work either.
+    with pytest.raises(pipeline.DataBlocked):
+        pipeline.load_bars("GOOD", "holdout", cache_dir=tmp_path / "cache", holdout_access=True)
+
+
+def test_access_object_cannot_be_forged():
+    with pytest.raises(holdout.HoldoutLocked):
+        holdout.HoldoutAccess(who="someone", unlocked_at_utc="2024-01-01T00:00:00+00:00")
+
+
+def test_unlock_writes_the_log_before_giving_access(pipeline_run, tmp_path):
+    _, run_dir = pipeline_run
+    log = tmp_path / "holdout_access.csv"
+    assert holdout.read_log(log) == []
+    access = holdout.unlock(who="Test Owner", reason="unit test on fixture data",
+                            command="pytest", log_file=log)
+    rows = holdout.read_log(log)
+    assert len(rows) == 1
+    assert rows[0]["who"] == "Test Owner" and rows[0]["reason"] == "unit test on fixture data"
+    assert rows[0]["unlocked_at_utc"] and rows[0]["os_user"]
+    bars = pipeline.load_bars("GOOD", "holdout", cache_dir=run_dir / "cache", holdout_access=access)
+    assert str(bars["session"].min().date()) == "2024-02-01"
+    # A second unlock adds a second line; nothing is overwritten.
+    holdout.unlock(who="Test Owner", reason="again", log_file=log)
+    assert len(holdout.read_log(log)) == 2
+
+
+@pytest.mark.parametrize("who, reason", [("", "a reason"), ("Someone", ""), ("  ", "x")])
+def test_unlock_needs_a_name_and_a_reason(tmp_path, who, reason):
+    with pytest.raises(holdout.HoldoutLocked):
+        holdout.unlock(who=who, reason=reason, log_file=tmp_path / "log.csv")
+    assert not (tmp_path / "log.csv").exists()
+
+
+def test_fund_listed_late_starts_at_its_first_bar_and_is_reported(pipeline_run):
+    report, tmp_path = pipeline_run
+    entry = {e["symbol"]: e for e in report["symbols"]}["YOUNG"]
+    assert entry["status"] == "OK" and entry["starts_late"] is True
+    assert entry["first_session"] == "2023-06-01"
+    assert entry["rows"] == entry["expected_sessions"]            # no gap counted before it existed
+    good = {e["symbol"]: e for e in report["symbols"]}["GOOD"]
+    assert good["starts_late"] is False
 
 
 def test_report_contains_no_prices(pipeline_run):
@@ -427,6 +473,7 @@ def test_report_contains_no_prices(pipeline_run):
 
 def test_unset_config_blocks_before_any_fetch(tmp_path):
     config = tmp_path / "paper.yaml"
-    config.write_text("universe: [SPY]\ndata:\n  source: TBD\n  calendar: NYSE\n  history_years: 10\n  cache_dir: x\n")
+    config.write_text("universe: [SPY]\ndata:\n  source: TBD\n  calendar: NYSE\n  start: '2003-01-01'\n"
+                      "  train_end: '2016-12-31'\n  validation_end: '2021-12-31'\n  cache_dir: x\n")
     with pytest.raises(pipeline.DataBlocked, match="data.source"):
         pipeline.load_settings(config)

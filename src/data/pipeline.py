@@ -11,11 +11,16 @@ What one run does, per symbol:
   3. Run every health check against the exchange calendar.
   4. If a check fails, or the source fails: cache NOTHING for that symbol and
      record the problem. No bar is ever filled in or made up.
-  5. If it passes: split by time into train (first 60% of sessions), validation
-     (next 20%) and holdout (last 20%) and save three parquet files.
+  5. If it passes: split by DATE (set in config/paper.yaml and protocol.md) into
+     train (warm-up included), validation and holdout, and save three parquet files.
 
-The holdout file is written but there is no function in this project that
-loads it. `load_bars` accepts only "train" and "validation".
+An ETF that was listed after the requested start simply begins later; the
+report says so and the gap check starts at its first bar.
+
+The holdout file is locked. `load_bars` gives "train" and "validation" to
+anyone, and "holdout" only to a caller holding a HoldoutAccess, which can only
+be made by `src.data.holdout.unlock(...)` - and that writes who, when and why
+to experiments/holdout_access.csv first.
 
 A report with dates and counts (never prices) goes to reports/data_health.json
 and reports/data_health.md. The run exits with code 1 if any symbol was blocked.
@@ -31,17 +36,14 @@ import yaml
 
 from src.data import sessions as cal
 from src.data import validate
+from src.data.holdout import HoldoutAccess
 from src.data.sources import SourceError, YFinanceSource, normalize
 
 PROJECT_DIR = Path(__file__).resolve().parents[2]
 CONFIG_FILE = PROJECT_DIR / "config" / "paper.yaml"
 REPORT_DIR = PROJECT_DIR / "reports"
 
-# Time split, the same shares as the existing 1-hour data: 60 / 20 / 20.
-TRAIN_SHARE = 0.60
-VALIDATION_SHARE = 0.20
-
-# The only windows code is allowed to load.
+# The windows anyone may load. "holdout" needs a HoldoutAccess (see load_bars).
 OPEN_WINDOWS = ("train", "validation")
 HOLDOUT_FILE = "holdout_LOCKED.parquet"
 
@@ -57,8 +59,9 @@ def load_settings(config_file: Path = CONFIG_FILE) -> dict:
     with open(config_file) as handle:
         config = yaml.safe_load(handle)
     data = dict(config.get("data") or {})
-    data["universe"] = list(config.get("universe") or [])
-    for key in ("source", "calendar", "history_years", "cache_dir"):
+    # Fetch the tradable universe and the cash vehicles together.
+    data["universe"] = list(config.get("universe") or []) + list(config.get("cash_vehicles") or [])
+    for key in ("source", "calendar", "start", "train_end", "validation_end", "cache_dir"):
         if data.get(key) in (None, "TBD"):
             raise DataBlocked(f"config/paper.yaml: data.{key} is not set (TBD). Nothing was fetched.")
     if data["source"] not in SOURCES:
@@ -66,13 +69,17 @@ def load_settings(config_file: Path = CONFIG_FILE) -> dict:
     return data
 
 
-def split_sessions(sessions: pd.DatetimeIndex) -> dict:
-    """Cut a list of trading days into train / validation / holdout by time."""
-    count = len(sessions)
-    train_end = int(count * TRAIN_SHARE)
-    validation_end = int(count * (TRAIN_SHARE + VALIDATION_SHARE))
-    return {"train": sessions[:train_end], "validation": sessions[train_end:validation_end],
-            "holdout": sessions[validation_end:]}
+def split_sessions(sessions: pd.DatetimeIndex, train_end, validation_end) -> dict:
+    """Cut a list of trading days into train / validation / holdout by date.
+
+    train      = every session up to and including `train_end` (warm-up included)
+    validation = after `train_end`, up to and including `validation_end`
+    holdout    = everything after `validation_end`
+    """
+    train_end, validation_end = pd.Timestamp(train_end), pd.Timestamp(validation_end)
+    return {"train": sessions[sessions <= train_end],
+            "validation": sessions[(sessions > train_end) & (sessions <= validation_end)],
+            "holdout": sessions[sessions > validation_end]}
 
 
 def _window_summary(windows: dict) -> dict:
@@ -95,11 +102,10 @@ def run(settings: dict, source=None, cache_dir: Path | None = None, report_dir: 
     calendar_name = settings["calendar"]
     now = pd.Timestamp.now(tz="UTC") if now is None else pd.Timestamp(now)
 
-    # The period: from N years before the last finished session, up to that session.
+    # The period: from the configured start up to the last finished session.
     end = cal.last_completed_session(calendar_name, now)
-    start = end - pd.DateOffset(years=int(settings["history_years"]))
-    expected = cal.expected_sessions(calendar_name, start, end)
-    windows = split_sessions(expected)
+    expected = cal.expected_sessions(calendar_name, settings["start"], end)
+    windows = split_sessions(expected, settings["train_end"], settings["validation_end"])
 
     report = {
         "generated_at": now.isoformat(), "source": source.name, "calendar": calendar_name,
@@ -123,9 +129,13 @@ def run(settings: dict, source=None, cache_dir: Path | None = None, report_dir: 
             report["blocked"].append(symbol)
             continue
 
-        # 3. Health checks.
-        health = validate.check_bars(bars, symbol, calendar_name, expected[0], expected[-1])
+        # 3. Health checks. A fund listed after the requested start begins at its
+        # own first bar; that is reported, and gaps are counted from there.
+        first_bar = bars["session"].min() if len(bars) else expected[0]
+        check_from = max(first_bar, expected[0]) if first_bar in expected else expected[0]
+        health = validate.check_bars(bars, symbol, calendar_name, check_from, expected[-1])
         entry.update(health.to_dict())
+        entry["starts_late"] = bool(check_from > expected[0])
         entry["adjustment"] = source.adjustment
         entry["dividend_days"] = int((bars["dividend"].fillna(0) > 0).sum())
         entry["split_days"] = int(((bars["split_ratio"].fillna(0) > 0) & (bars["split_ratio"] != 1)).sum())
@@ -174,13 +184,14 @@ def render_markdown(report: dict) -> str:
         label = "holdout (LOCKED)" if name == "holdout" else name
         lines.append(f"| {label} | {window['first_session']} | {window['last_session']} | {window['sessions']} |")
     lines += ["", "## Symbols", "",
-              "| Symbol | Status | Rows | Expected | First | Last | Dividend days | Split days | Adjustment |",
-              "|---|---|---|---|---|---|---|---|---|"]
+              "| Symbol | Status | Rows | Expected | First | Last | Starts late | Dividend days | Split days | Adjustment |",
+              "|---|---|---|---|---|---|---|---|---|---|"]
     for entry in report["symbols"]:
-        lines.append("| {symbol} | {status} | {rows} | {expected} | {first} | {last} | {div} | {split} | {adj} |".format(
+        lines.append("| {symbol} | {status} | {rows} | {expected} | {first} | {last} | {late} | {div} | {split} | {adj} |".format(
             symbol=entry["symbol"], status=entry["status"], rows=entry.get("rows", "-"),
             expected=entry.get("expected_sessions", "-"), first=entry.get("first_session", "-"),
-            last=entry.get("last_session", "-"), div=entry.get("dividend_days", "-"),
+            last=entry.get("last_session", "-"),
+            late="yes" if entry.get("starts_late") else "no", div=entry.get("dividend_days", "-"),
             split=entry.get("split_days", "-"), adj=entry.get("adjustment", "-")))
     lines += ["", "## Problems", ""]
     problems = []
@@ -197,13 +208,26 @@ def render_markdown(report: dict) -> str:
     return "\n".join(lines)
 
 
-def load_bars(symbol: str, window: str, cache_dir: Path | None = None) -> pd.DataFrame:
-    """Load cached bars for one symbol. Only "train" and "validation" can be loaded."""
-    if window not in OPEN_WINDOWS:
-        raise DataBlocked(f"window '{window}' cannot be loaded. Allowed: {OPEN_WINDOWS}. The holdout stays locked.")
+def load_bars(symbol: str, window: str, cache_dir: Path | None = None,
+              holdout_access: HoldoutAccess | None = None) -> pd.DataFrame:
+    """Load cached bars for one symbol.
+
+    "train" and "validation" load for anyone. "holdout" loads only when the
+    caller passes a HoldoutAccess, which `src.data.holdout.unlock` hands out
+    after writing the access to the log. Anything else is refused.
+    """
+    if window == "holdout":
+        if not isinstance(holdout_access, HoldoutAccess):
+            raise DataBlocked("the holdout is LOCKED. It opens only through src.data.holdout.unlock(...), "
+                              "which logs who and when. Only the owner does that.")
+        file_name = HOLDOUT_FILE
+    elif window in OPEN_WINDOWS:
+        file_name = f"{window}.parquet"
+    else:
+        raise DataBlocked(f"window '{window}' cannot be loaded. Allowed: {OPEN_WINDOWS} (and the locked holdout).")
     if cache_dir is None:
         cache_dir = PROJECT_DIR / load_settings()["cache_dir"]
-    path = Path(cache_dir) / "daily" / symbol / f"{window}.parquet"
+    path = Path(cache_dir) / "daily" / symbol / file_name
     if not path.exists():
         raise DataBlocked(f"no cached {window} bars for {symbol}: it was never fetched or it failed its health checks")
     return pd.read_parquet(path)

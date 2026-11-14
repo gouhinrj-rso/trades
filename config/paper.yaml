@@ -11,8 +11,8 @@ account:
   base_currency: USD
 
 costs:
-  fee_bps_per_side: 2.0      # same as FEE_BPS_PER_SIDE in engine.py
-  slippage_bps: TBD          # owner decision - not set yet
+  fee_bps_per_side: 2.0      # commission per side; same as FEE_BPS_PER_SIDE in engine.py
+  slippage_bps: 5.0          # per side, against the open (owner, 2026-11-14)
 
 orders:
   order_lifetime_bars: 1     # an unfilled limit order is cancelled after this many bars
@@ -23,15 +23,26 @@ current_market:
   symbol: ETH/USD
   bar_size: 1h
 
-# Universe for the daily-bar pipeline in src/data.
-# The owner said "you choose" on 2026-11-14, so Claude picked five large, liquid
-# US ETFs across asset classes to prove the pipeline. This is a starting list,
-# not a recommendation; change it freely.
-universe: [SPY, QQQ, IWM, TLT, GLD]
+# Universe for the frozen baseline B1 (owner's list, 2026-11-14; see protocol.md).
+# Long-only ETFs. Do not change it: the baseline is frozen.
+universe: [SPY, QQQ, IWM, EFA, EEM, TLT, IEF, GLD, DBC, VNQ]
+
+# Where idle money sits. The first one that passes its data-health checks is used.
+cash_vehicles: [SHV, BIL]
 
 data:
-  source: yfinance           # RESEARCH ONLY. Owner had no preference (2026-11-14); needs no key.
-  calendar: NYSE             # exchange calendar used for gap checks and bar closing times
+  source: yfinance             # RESEARCH ONLY. Needs no key.
+  calendar: NYSE               # exchange calendar used for gap checks and bar closing times
   bar_size: 1d
-  history_years: 10          # owner's choice 2026-11-14
-  cache_dir: data/cache      # git-ignored; split 60/20/20 by time, last 20% is the locked holdout
+  start: "2003-01-01"          # warm-up history for the first signals in 2005
+  train_end: "2016-12-31"      # train = 2005-2016 (bars from 2003 are warm-up only)
+  validation_end: "2021-12-31" # validation = 2017-2021; everything later is the LOCKED holdout
+  cache_dir: data/cache        # git-ignored
+
+# Frozen baseline B1 (protocol.md section 1). Do not edit these values.
+baseline:
+  momentum_lookback_months: 12
+  momentum_skip_months: 1
+  trend_sma_days: 200
+  volatility_days: 60
+  trade_start: "2005-01-01"

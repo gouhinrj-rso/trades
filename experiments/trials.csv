@@ -1,1 +1,1 @@
-trial_id,logged_at_utc,git_commit,strategy,params_json,data_window,bar_size,fees_bps_per_side,slippage_bps,train_return_pct,validation_return_pct,validation_max_drawdown_pct,validation_trades,sharpe,status,failure_reason,notes
+trial_id,logged_at_utc,git_commit,git_dirty,run_group,run_kind,strategy,params_json,cost_multiple,commission_bps,slippage_bps,window_start,window_end,holdout_unlocked,n_days,total_return,cagr,sharpe_annual,sharpe_per_day,max_drawdown,n_round_trips,status,failure_reason,notes
