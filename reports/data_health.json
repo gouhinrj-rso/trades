@@ -1,0 +1,101 @@
+{
+  "generated_at": "2026-11-14T14:05:41.164313+00:00",
+  "source": "yfinance",
+  "calendar": "NYSE",
+  "requested": {
+    "first_session": "2016-11-14",
+    "last_session": "2026-11-13",
+    "sessions": 2514
+  },
+  "windows": {
+    "train": {
+      "first_session": "2016-11-14",
+      "last_session": "2022-11-09",
+      "sessions": 1508
+    },
+    "validation": {
+      "first_session": "2022-11-10",
+      "last_session": "2024-11-11",
+      "sessions": 503
+    },
+    "holdout": {
+      "first_session": "2024-11-12",
+      "last_session": "2026-11-13",
+      "sessions": 503
+    }
+  },
+  "symbols": [
+    {
+      "symbol": "SPY",
+      "status": "OK",
+      "cached": true,
+      "passed": true,
+      "rows": 2514,
+      "first_session": "2016-11-14",
+      "last_session": "2026-11-13",
+      "expected_sessions": 2514,
+      "issues": [],
+      "adjustment": "split_adjusted",
+      "dividend_days": 40,
+      "split_days": 0
+    },
+    {
+      "symbol": "QQQ",
+      "status": "OK",
+      "cached": true,
+      "passed": true,
+      "rows": 2514,
+      "first_session": "2016-11-14",
+      "last_session": "2026-11-13",
+      "expected_sessions": 2514,
+      "issues": [],
+      "adjustment": "split_adjusted",
+      "dividend_days": 40,
+      "split_days": 0
+    },
+    {
+      "symbol": "IWM",
+      "status": "OK",
+      "cached": true,
+      "passed": true,
+      "rows": 2514,
+      "first_session": "2016-11-14",
+      "last_session": "2026-11-13",
+      "expected_sessions": 2514,
+      "issues": [],
+      "adjustment": "split_adjusted",
+      "dividend_days": 40,
+      "split_days": 0
+    },
+    {
+      "symbol": "TLT",
+      "status": "OK",
+      "cached": true,
+      "passed": true,
+      "rows": 2514,
+      "first_session": "2016-11-14",
+      "last_session": "2026-11-13",
+      "expected_sessions": 2514,
+      "issues": [],
+      "adjustment": "split_adjusted",
+      "dividend_days": 120,
+      "split_days": 0
+    },
+    {
+      "symbol": "GLD",
+      "status": "OK",
+      "cached": true,
+      "passed": true,
+      "rows": 2514,
+      "first_session": "2016-11-14",
+      "last_session": "2026-11-13",
+      "expected_sessions": 2514,
+      "issues": [],
+      "adjustment": "split_adjusted",
+      "dividend_days": 0,
+      "split_days": 0
+    }
+  ],
+  "blocked": [],
+  "passed": true
+}

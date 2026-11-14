@@ -8,6 +8,11 @@ plotly==7.1.0
 pandas==3.1.1
 PyYAML==6.0.3
 
+# Daily-bar data pipeline (src/data). yfinance is a market-data library, research only.
+yfinance==1.8.0
+pandas_market_calendars==5.6.1
+pyarrow==26.0.1
+
 # Memory of failed ideas (runs locally, no API key)
 mem0ai==2.2.1
 fastembed==0.9.1

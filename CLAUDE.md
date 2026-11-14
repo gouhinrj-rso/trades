@@ -41,6 +41,7 @@ Python 3.12 (`.python-version`); every dependency in `requirements.txt` is pinne
 | Set up | `python3.12 -m venv .venv && .venv/bin/pip install -r requirements.txt` |
 | Hook tests only | `python -m pytest tests/test_block_live.py -v` |
 | Install | `pip install -r requirements.txt` |
+| Daily bars | `python -m src.data.pipeline` (fetch, health-check, split and cache the universe in `config/paper.yaml`; a rerun prints the saved report; `--refresh` refetches and moves the holdout, owner only) |
 | Run | `streamlit run app.py` |
 | Test | `python -m pytest` |
 | Backtest | `python engine.py` (all candidates on train and validation; fees 2 bps per side; never reads the test window) |
@@ -107,6 +108,26 @@ Python 3.12 (`.python-version`); every dependency in `requirements.txt` is pinne
   `zscore(window=90, entry=1.5)`, all neighbours judged on the same six-day validation window.
 - Result on 1-hour bars with unchanged thresholds: 1 of 18 grid candidates passes the gate
   (`zscore(window=80, entry=1.5)`); on the 5-minute data 5 passed, and none of those 5 passes now.
+
+## Daily bars (`src/data`) and the ledger (`src/accounting`), added 2026-11-14
+
+- `python -m src.data.pipeline` downloads daily bars for the universe in `config/paper.yaml` (SPY, QQQ, IWM,
+  TLT, GLD: the owner said "you choose") from yfinance, which is research only. Ten years, NYSE calendar.
+- Every row carries `source`, `fetched_at`, `available_at` (the session's closing time, UTC) and `adjustment`.
+  yfinance prices are split adjusted, not dividend adjusted; `adj_close` is both. Never mix flags in one series.
+- A symbol that fails any health check, or whose source fails, is not cached at all. Nothing is filled,
+  interpolated or made up. The report is `reports/data_health.md` and `.json` (dates and counts, no prices).
+- First fetch 2026-11-14: 2016-11-14 to 2026-11-13, 2514 sessions, all five symbols passed every check.
+  Train 2016-11-14 to 2022-11-09 (1508), validation 2022-11-10 to 2024-11-11 (503),
+  **holdout 2024-11-12 to 2026-11-13 (503), locked**.
+- The cache is `data/cache/daily/<SYMBOL>/{train,validation,holdout_LOCKED}.parquet`, git-ignored.
+  **Never open `holdout_LOCKED.parquet`.** `pipeline.load_bars` loads only train and validation; do not add
+  a way to load the holdout. Do not run `--refresh` without the owner asking: it moves all three windows.
+- Lookahead rules, enforced by `src/data/lookahead.py`: a signal at bar t uses bars up to t only, and its
+  order fills at the open of bar t+1. New strategy code must go through `run_signals` and `next_open_fills`
+  and have an `assert_no_lookahead` test.
+- The ledger (`src/accounting`) records cash, positions, fills, fees, slippage and cash-flow-adjusted
+  equity. Futures rolls happen only through an explicit `roll(...)` call.
 
 ## Memory of failed ideas
 

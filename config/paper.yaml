@@ -23,11 +23,15 @@ current_market:
   symbol: ETH/USD
   bar_size: 1h
 
-# Universe for the daily-bar pipeline in src/data. TBD - owner decision.
-# An empty list means src/data downloads nothing.
-universe: []
+# Universe for the daily-bar pipeline in src/data.
+# The owner said "you choose" on 2026-11-14, so Claude picked five large, liquid
+# US ETFs across asset classes to prove the pipeline. This is a starting list,
+# not a recommendation; change it freely.
+universe: [SPY, QQQ, IWM, TLT, GLD]
 
 data:
-  source: TBD                # owner decision: alpaca_paper_data or yfinance (research only)
+  source: yfinance           # RESEARCH ONLY. Owner had no preference (2026-11-14); needs no key.
+  calendar: NYSE             # exchange calendar used for gap checks and bar closing times
   bar_size: 1d
-  cache_dir: data/cache
+  history_years: 10          # owner's choice 2026-11-14
+  cache_dir: data/cache      # git-ignored; split 60/20/20 by time, last 20% is the locked holdout
