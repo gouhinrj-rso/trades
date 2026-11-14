@@ -33,6 +33,11 @@ universe: [SPY, QQQ, IWM, EFA, EEM, TLT, IEF, GLD, DBC, VNQ]
 # event-file checker which tickers to accept.
 scout_watchlist: [CL, NG, GC, HG, ZC, ZW]
 
+# Which traded instrument a watched ticker stands for, e.g. {GC: GLD}. EMPTY ON PURPOSE:
+# the owner decides. With no entry, a veto applies only to an instrument with exactly
+# the same ticker - and none of the six above is traded, so today no veto can apply.
+scout_ticker_map: {}
+
 # Where idle money sits. The first one that passes its data-health checks is used.
 cash_vehicles: [SHV, BIL]
 
