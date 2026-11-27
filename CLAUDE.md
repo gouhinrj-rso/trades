@@ -163,6 +163,20 @@ Python 3.12 (`.python-version`); every dependency in `requirements.txt` is pinne
 - Open owner decisions: the full watchlist, where the Bot commits (a separate data-only repository is
   recommended; it currently pushes to this repository) and the X-search cap per run.
 
+## Market Scout shadow mode (PRD Prompt 7), added 2026-11-14
+
+- `python -m src.research.grok_events ingest` checks `research/events/*.jsonl` and appends good lines to
+  `research/ingested/events.jsonl` with `ingested_at`; bad lines go to `rejected.jsonl`. Never edit either file.
+- `python -m src.research.grok_events report` writes `reports/grok_value.md`.
+- **Shadow only.** The paper strategy never sees a veto. `VetoOverlay` wraps a weight function for a parallel
+  run and can only remove a new entry: it never adds, enlarges or sells. No events means overlay = baseline.
+- A veto counts from `ingested_at`, not from the time written inside it. Do not back-fill events.
+- Fixed before any forward data: a recommendation needs 63 trading days and 20 applied vetoes; a veto with no
+  event time lapses at the close of the second trading day. Do not tune these on results.
+- State on 2026-11-14: 10 events ingested, 1 rejected, 5 vetoes, **0 applicable** (the Bot watches futures, the
+  strategy trades ETFs, `scout_ticker_map` is empty). No forward comparison has run; that needs PRD Prompt 8.
+- `research/grok/costs.csv` (date, usd, note) is filled in by the owner. Never invent a cost.
+
 ## Memory of failed ideas
 
 `memory.py` stores one lesson per blocked candidate in mem0 (`memory_store/`, committed so it
